@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:forms/customer_home_page/appbar.dart';
-import 'package:forms/customer_home_page/reviews_page.dart';
+import 'package:forms/customer_home_page/review_bottom_sheet.dart';
 import 'package:forms/customer_home_page/wishlist/wishlist_button.dart';
 import 'package:forms/final_vars.dart';
 import 'package:forms/functions.dart';
@@ -390,7 +390,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                   ),
-                  builder: (context) => const ReviewBottomSheet(),
+                  builder: (context) => ReviewBottomSheet(productId: widget.productId),
                 );
               },
               ),//revised review button

@@ -1,31 +1,11 @@
-/*import 'package:flutter/material.dart';
-import 'package:forms/customer_home_page/appbar.dart';
-
-class ReviewsPage extends StatelessWidget {
-  const ReviewsPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: appBar(
-        context,
-        title: "Reviews",
-        
-      ),
-      body: Column(
-        children: [
-          Text("Reviews"),
-        ],
-      ),
-    );
-  }
-}*/
-
-
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ReviewBottomSheet extends StatefulWidget {
-  const ReviewBottomSheet({super.key});
+  final String productId;
+
+  const ReviewBottomSheet({super.key, required this.productId});
 
   @override
   State<ReviewBottomSheet> createState() => _ReviewBottomSheetState();
@@ -38,27 +18,87 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
 
   List<Map<String, dynamic>> reviews = [];
 
-  void _submitReview() {
+  @override
+  void initState() {
+    super.initState();
+    _loadProductReviews();
+  }
+
+  Future<void> _loadProductReviews() async {
+    final productDoc = await FirebaseFirestore.instance
+        .collection('products')
+        .doc(widget.productId)
+        .get();
+
+    final data = productDoc.data();
+    if (data == null) return;
+
+    final reviewList = List<Map<String, dynamic>>.from(data['reviews'] ?? []);
+    final usersCollection = FirebaseFirestore.instance.collection('users');
+
+    final enrichedReviews = await Future.wait(reviewList.map((r) async {
+      final userId = r['userId'] ?? '';
+      String name = 'User';
+
+      if (userId.isNotEmpty) {
+        final userSnap = await usersCollection.doc(userId).get();
+        name = userSnap.data()?['name'] ?? 'User';
+      }
+
+      return {
+        'userId': userId,
+        'name': name,
+        'review': r['review'],
+        'rating': (r['rating'] ?? 0).toDouble(),
+      };
+    }).toList());
+
+    setState(() {
+      reviews = enrichedReviews;
+    });
+  }
+
+  Future<void> _submitReview() async {
     if (_reviewController.text.trim().isEmpty || _currentRating == 0) return;
+
+    final reviewText = _reviewController.text.trim();
+    final rating = _currentRating;
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) return;
+
+    final userId = user.uid;
+    final userDoc = FirebaseFirestore.instance.collection('users').doc(userId);
+    final productDoc = FirebaseFirestore.instance.collection('products').doc(widget.productId);
+
+    await userDoc.set({
+      'review': reviewText,
+      'rating': rating,
+    }, SetOptions(merge: true));
+
+    final newReview = {
+      'review': reviewText,
+      'rating': rating,
+      'userId': userId,
+    };
+
+    await productDoc.update({
+      'reviews': FieldValue.arrayUnion([newReview]),
+    });
+
+    final userSnap = await userDoc.get();
+    final userName = userSnap.data()?['name'] ?? 'You';
 
     setState(() {
       reviews.add({
-        'userId': '001',
-        'name': 'You',
-        'rating': _currentRating,
-        'review': _reviewController.text.trim(),
+        'userId': userId,
+        'name': userName,
+        'rating': rating,
+        'review': reviewText,
       });
       _reviewController.clear();
       _currentRating = 0;
       _showInput = false;
-
-        // ⬇️ Print the review to the terminal (controller logic)
-      print('Review Added:');
-      print('User ID: ${reviews[0]}');
-      print('User Name: ${reviews[1]}');
-      print('Rating: ${reviews[2]}');
-      print('Review: ${reviews[3]}');
-
     });
   }
 
@@ -110,8 +150,6 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
               const SizedBox(height: 5),
               const Text("See what others are saying about this product", style: TextStyle(fontSize: 14, color: Colors.grey)),
               const SizedBox(height: 15),
-
-              // Toggle Review Input Section
               !_showInput
                   ? ElevatedButton(
                       onPressed: () => setState(() => _showInput = true),
@@ -122,7 +160,7 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: const Text("Add Review",style: TextStyle(color: Colors.white),),
+                      child: const Text("Add Review", style: TextStyle(color: Colors.white)),
                     )
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,7 +188,6 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                       ],
                     ),
               const SizedBox(height: 15),
-
               Expanded(
                 child: ListView.builder(
                   controller: scrollController,
@@ -173,13 +210,6 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
     );
   }
 }
-
-
-
-
-
-
-//list tile for individual reviews
 
 class ReviewItem extends StatelessWidget {
   final String userId;
@@ -205,18 +235,15 @@ class ReviewItem extends StatelessWidget {
       subtitle: Text(review),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
-        children: List.generate(
-          5,
-          (index) {
-            if (rating >= index + 1) {
-              return const Icon(Icons.star, size: 16, color: Colors.orange);
-            } else if (rating > index && rating < index + 1) {
-              return const Icon(Icons.star_half, size: 16, color: Colors.orange);
-            } else {
-              return const Icon(Icons.star_border, size: 16, color: Colors.orange);
-            }
-          },
-        ),
+        children: List.generate(5, (index) {
+          if (rating >= index + 1) {
+            return const Icon(Icons.star, size: 16, color: Colors.orange);
+          } else if (rating > index && rating < index + 1) {
+            return const Icon(Icons.star_half, size: 16, color: Colors.orange);
+          } else {
+            return const Icon(Icons.star_border, size: 16, color: Colors.orange);
+          }
+        }),
       ),
     );
   }

@@ -119,74 +119,9 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
               ),
             ),
 
-            // Expanded(
-            //   child: results.isEmpty
-            //       ? const Center(child: Text('No products found'))
-            //       : ListView.builder(
-            //           itemCount: results.length,
-            //           itemBuilder: (context, index) {
-            //             final product = results[index];
-            //             debugPrint(
-            //               "farmerId: ${product["farmerId"]}, type: ${product["farmerId"]?.runtimeType}",
-            //             );
-            //             debugPrint(
-            //               "productName: ${product["productName"]}, type: ${product["productName"]?.runtimeType}",
-            //             );
-
-            //             return FutureBuilder<String?>(
-            //               future: getProductIdByFarmerAndName(
-            //                 farmerId:
-            //                     product["farmerId"] ??
-            //                     "8qoycpzhz4hCwQ1LBikoGw8861t2",
-            //                 productName: product["productName"].toString(),
-            //               ),
-            //               builder: (context, snapshot) {
-            //                 if (!snapshot.hasData) {
-            //                   return const CircularProgressIndicator(); // or SizedBox.shrink()
-            //                 }
-
-            //                 return ProductCard(
-            //                   path: product["img"]?.toString() ?? "", // ✅
-            //                   productId: snapshot.data ?? "", // ✅
-            //                   productName:
-            //                       product["productName"]?.toString() ?? "", // ✅
-            //                   harvestedDate:
-            //                       product["harvestedDate"]?.toString() ?? "", // ✅
-            //                   farmerId:
-            //                       product["farmerId"]?.toString() ?? "", // ✅
-            //                   stock: product["stock"]?.toString() ?? "0", // ✅
-            //                   sellingPrice:
-            //                       product["sellingPrice"]?.toString() ?? "0", // ✅
-            //                   discountPercent:
-            //                       product["discountPercent"]?.toString() ??
-            //                       "0", // ✅
-            //                   unit: product["unit"]?.toString() ?? "", // ✅
-            //                   mrp: product["mrp"]?.toString() ?? "0", // ✅
-            //                 );
-            //               },
-            //             );
-            //           },
-            //         ),
-            // ),
           ],
         ),
       ),
     );
   }
 }
-// ProductCard(
-//                         path: product["img"],
-//                         productId:
-//                             getProductIdByFarmerAndName(
-//                               farmerId: product["farmerId"],
-//                               productName: product["productname"],
-//                             ).toString(),
-//                         productName: product["name"],
-//                         harvestedDate: product["harvestedDate"],
-//                         farmerId: product["farmerId"],
-//                         stock: product["stock"],
-//                         sellingPrice: product["sellingPrice"],
-//                         discountPercent: product["discountPercent"],
-//                         unit: product["unit"],
-//                         mrp: product["mrp"],
-//                       );
