@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:math';
 
 Future<Map<String, dynamic>?> getCurrentUserDetails() async {
   try {
@@ -29,7 +30,6 @@ Future<Map<String, dynamic>?> getCurrentUserDetails() async {
   }
 }
 
-
 Future<String?> getUserIdFromOrder(String orderId) async {
   try {
     final orderDoc = await FirebaseFirestore.instance
@@ -48,26 +48,28 @@ Future<String?> getUserIdFromOrder(String orderId) async {
   }
 }
 
+Future<String?> getUserNameFromOrder(String orderId) async {
+  try {
+    final orderDoc = await FirebaseFirestore.instance
+        .collection('orders')
+        .doc(orderId)
+        .get();
 
- Future<String?> getUserNameFromOrder(String orderId) async {
-    try {
-      final orderDoc = await FirebaseFirestore.instance
-          .collection('orders')
-          .doc(orderId)
-          .get();
-
-      final data = orderDoc.data();
-      if (data == null || !data.containsKey('userId')) {
-        return null; // Order not found or missing userId
-      }
-
-      final buyer = await FirebaseFirestore.instance.collection('users').doc(data['userId']).get();
-      return buyer['name'] as String;
-    } catch (e) {
-      debugPrint('Error fetching userId from order: $e');
-      return null;
+    final data = orderDoc.data();
+    if (data == null || !data.containsKey('userId')) {
+      return null; // Order not found or missing userId
     }
+
+    final buyer = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(data['userId'])
+        .get();
+    return buyer['name'] as String;
+  } catch (e) {
+    debugPrint('Error fetching userId from order: $e');
+    return null;
   }
+}
 
 String displayStock(int stock, String unit) {
   unit = unit.trim().toLowerCase();
@@ -336,9 +338,23 @@ Stack stack({
   );
 }
 
+double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+  const R = 6371; // km
+  final dLat = deg2rad(lat2 - lat1);
+  final dLon = deg2rad(lon2 - lon1);
+
+  final a =
+      sin(dLat / 2) * sin(dLat / 2) +
+      cos(deg2rad(lat1)) * cos(deg2rad(lat2)) * sin(dLon / 2) * sin(dLon / 2);
+  final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+  return R * c;
+}
+
+double deg2rad(double deg) {
+  return deg * (pi / 180);
+}
 
 // Firestore functions for loading:
-
 
 final _firestore = FirebaseFirestore.instance;
 
@@ -372,7 +388,6 @@ Future<List<Map<String, dynamic>>> loadProducts() async {
   }
 }
 
-
 /// Load users from Firestore
 Future<List<Map<String, dynamic>>> loadUsers() async {
   try {
@@ -388,11 +403,11 @@ Future<List<Map<String, dynamic>>> loadUsers() async {
         'phone': data['phone'],
         'role': data['role'],
         'address': data['address'],
-        'revenue': data['revenue']??"",
+        'revenue': data['revenue'] ?? "",
         'latitude': data['latitude'],
         'longitude': data['longitude'],
-        'orders': data['orders']??"",
-        'totalStock': data['totalStock']??"",
+        'orders': data['orders'] ?? "",
+        'totalStock': data['totalStock'] ?? "",
         'createdAt': data['createdAt'],
       };
     }).toList();
@@ -401,7 +416,6 @@ Future<List<Map<String, dynamic>>> loadUsers() async {
     return [];
   }
 }
-
 
 /// Load orders from Firestore
 Future<List<Map<String, dynamic>>> loadOrders() async {
@@ -423,4 +437,3 @@ Future<List<Map<String, dynamic>>> loadOrders() async {
     return [];
   }
 }
-

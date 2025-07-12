@@ -1,232 +1,3 @@
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:flutter/material.dart';
-// import 'package:forms/customer_home_page/appbar.dart';
-// import 'package:forms/customer_home_page/hamburger_menu.dart';
-// import 'package:forms/customer_home_page/product_card.dart';
-// import 'package:forms/customer_home_page/carousal.dart';
-
-// class ProductList extends StatefulWidget {
-//   const ProductList({super.key});
-
-//   @override
-//   State<ProductList> createState() => _ProductListState();
-// }
-
-// class _ProductListState extends State<ProductList> {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: appBar(context,logo: true,hamburger: true,search: true),
-//       drawer: HamburgerMenu(),
-//       body: Padding(
-//         padding: const EdgeInsets.all(16.0),
-//         child: SingleChildScrollView(
-//           child: Column(
-//             children: [
-//               SizedBox(height: 20),
-//               CustomCarousel(
-//                 imagePaths: [
-//                   'assets/images/p4.jpeg',
-//                   'assets/images/p1.jpeg',
-//                   'assets/images/p6.jpeg',
-//                   'assets/images/p7.jpeg',
-//                   'assets/images/p9.jpeg',
-//                 ],
-//               ),
-//               SizedBox(height: 20),
-//               FutureBuilder(
-//                 future: FirebaseFirestore.instance.collection("products").get(),
-//                 builder: (context, snapshot) {
-//                   if (snapshot.connectionState == ConnectionState.waiting) {
-//                     return Center(child: CircularProgressIndicator());
-//                   }
-//                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-//                     return Center(child: Text("No data found"));
-//                   }
-
-//                   return GridView.builder(
-//                     shrinkWrap: true,// ✅ Allow ListView to size itself
-//                     physics:
-//                         NeverScrollableScrollPhysics(), // ✅ Prevent nested scroll
-//                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-//                       crossAxisCount: 3, // 3 cards per row
-//                       crossAxisSpacing: 7, // space between cards
-//                       mainAxisSpacing: 10, // space between rows
-//                       childAspectRatio: 0.44, // aspect ratio of cards
-//                     ),
-//                     itemCount: snapshot.data!.docs.length,
-//                     itemBuilder: (context, index) {
-//                       final product = snapshot.data!.docs[index];
-//                       return ProductCard(
-//                         path: product["img"],
-//                         productId:product.id,
-//                         unit: "${product["unit"]}",
-//                         farmerId: product["farmerId"],
-//                         harvestedDate: product["harvestedDate"],
-//                         // isOrganic: product["isOrganic"],
-//                         productName: product["productName"],
-//                         sellingPrice: product["sellingPrice"].toString(),
-//                         mrp: product["mrp"].toString(),
-//                         discountPercent:product["discountPercent"].toString(),
-//                         stock:product["stock"].toString()
-//                       );
-//                     },
-//                   );
-//                 },
-//               ),
-//               SizedBox(height: 20),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-// import 'dart:math';
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:flutter/material.dart';
-// import 'package:forms/customer_home_page/appbar.dart';
-// import 'package:forms/customer_home_page/hamburger_menu.dart';
-// import 'package:forms/customer_home_page/product_card.dart';
-// import 'package:forms/customer_home_page/carousal.dart';
-
-// class ProductList extends StatefulWidget {
-//   const ProductList({super.key});
-
-//   @override
-//   State<ProductList> createState() => _ProductListState();
-// }
-
-// class _ProductListState extends State<ProductList> {
-//   List<Map<String, dynamic>> _nearbyProducts = [];
-//   bool _loading = true;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     fetchNearbyProducts();
-//   }
-
-//   Future<void> fetchNearbyProducts() async {
-//     // 🔁 Step 1: Get current user ID
-//     final userId = FirebaseFirestore.instance.collection('users').doc().id;
-
-//     // 🔁 Step 2: Get current user location
-//     final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
-//     final userData = userDoc.data();
-//     if (userData == null) return;
-
-//     final userLat = userData['latitude'];
-//     final userLng = userData['longitude'];
-
-//     final productsSnapshot = await FirebaseFirestore.instance.collection('products').get();
-//     final List<Map<String, dynamic>> filteredProducts = [];
-
-//     for (var doc in productsSnapshot.docs) {
-//       final productData = doc.data();
-//       final farmerId = productData['farmerId'];
-
-//       final farmerDoc = await FirebaseFirestore.instance.collection('users').doc(farmerId).get();
-//       final farmerData = farmerDoc.data();
-
-//       if (farmerData != null &&
-//           farmerData['latitude'] != null &&
-//           farmerData['longitude'] != null) {
-//         final distance = calculateDistance(
-//           userLat,
-//           userLng,
-//           farmerData['latitude'],
-//           farmerData['longitude'],
-//         );
-
-//         if (distance <= 5.0) {
-//           productData['id'] = doc.id;
-//           filteredProducts.add(productData);
-//         }
-//       }
-//     }
-
-//     setState(() {
-//       _nearbyProducts = filteredProducts;
-//       _loading = false;
-//     });
-//   }
-
-//   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-//     const R = 6371;
-//     final dLat = _degToRad(lat2 - lat1);
-//     final dLon = _degToRad(lon2 - lon1);
-//     final a = sin(dLat / 2) * sin(dLat / 2) +
-//         cos(_degToRad(lat1)) * cos(_degToRad(lat2)) *
-//             sin(dLon / 2) * sin(dLon / 2);
-//     final c = 2 * atan2(sqrt(a), sqrt(1 - a));
-//     return R * c;
-//   }
-
-//   double _degToRad(double deg) => deg * (pi / 180);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: appBar(context, logo: true, hamburger: true, search: true),
-//       drawer: HamburgerMenu(),
-//       body: Padding(
-//         padding: const EdgeInsets.all(16.0),
-//         child: SingleChildScrollView(
-//           child: Column(
-//             children: [
-//               const SizedBox(height: 20),
-//               CustomCarousel(
-//                 imagePaths: [
-//                   'assets/images/p4.jpeg',
-//                   'assets/images/p1.jpeg',
-//                   'assets/images/p6.jpeg',
-//                   'assets/images/p7.jpeg',
-//                   'assets/images/p9.jpeg',
-//                 ],
-//               ),
-//               const SizedBox(height: 20),
-//               if (_loading)
-//                 const Center(child: CircularProgressIndicator())
-//               else if (_nearbyProducts.isEmpty)
-//                 const Center(child: Text("No nearby products found"))
-//               else
-//                 GridView.builder(
-//                   shrinkWrap: true,
-//                   physics: const NeverScrollableScrollPhysics(),
-//                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-//                     crossAxisCount: 3,
-//                     crossAxisSpacing: 7,
-//                     mainAxisSpacing: 10,
-//                     childAspectRatio: 0.44,
-//                   ),
-//                   itemCount: _nearbyProducts.length,
-//                   itemBuilder: (context, index) {
-//                     final product = _nearbyProducts[index];
-//                     return ProductCard(
-//                       path: product["img"],
-//                       productId: product['id'],
-//                       unit: "${product["unit"]}",
-//                       farmerId: product["farmerId"],
-//                       harvestedDate: product["harvestedDate"],
-//                       productName: product["productName"],
-//                       sellingPrice: product["sellingPrice"].toString(),
-//                       mrp: product["mrp"].toString(),
-//                       discountPercent: product["discountPercent"].toString(),
-//                       stock: product["stock"].toString(),
-//                     );
-//                   },
-//                 ),
-//               const SizedBox(height: 20),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:forms/customer_home_page/appbar.dart';
@@ -234,7 +5,7 @@ import 'package:forms/customer_home_page/hamburger_menu.dart';
 import 'package:forms/customer_home_page/product_card.dart';
 import 'package:forms/customer_home_page/carousal.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:math';
+import 'package:forms/functions.dart';
 
 import 'package:geolocator/geolocator.dart';
 
@@ -254,44 +25,6 @@ class _ProductListState extends State<ProductList> {
     super.initState();
     _loadProductsWithinRadius();
   }
-
-
-
-Future<bool> validateIsNearest() async {
-  final position = await getCurrentLocation();
-  if (position == null) return false;
-
-  final productsSnapshot = await FirebaseFirestore.instance.collection("products").get();
-
-  for (final productDoc in productsSnapshot.docs) {
-    final data = productDoc.data();
-    final farmerId = data['farmerId'];
-    if (farmerId == null) continue;
-
-    // Fetch farmer's location from users collection
-    final farmerDoc = await FirebaseFirestore.instance.collection("users").doc(farmerId).get();
-    final farmerData = farmerDoc.data();
-    if (farmerData == null || farmerData['latitude'] == null || farmerData['longitude'] == null) {
-      continue;
-    }
-
-    final double lat = farmerData['latitude'];
-    final double lng = farmerData['longitude'];
-
-    final distance = _calculateDistance(
-      position.latitude,
-      position.longitude,
-      lat,
-      lng,
-    );
-
-    if (distance <= 0.5) {
-      return true; // Found a product nearby
-    }
-  }
-
-  return false; // No nearby product
-}
 
 
   Future<void> _loadProductsWithinRadius() async {
@@ -342,13 +75,14 @@ Future<bool> validateIsNearest() async {
         if (farmerData == null ||
             farmerData['latitude'] == null ||
             farmerData['longitude'] == null) {
+              debugPrint("⛔ Skipping $farmerId: missing lat/lng");
           continue;
         }
 
         final double farmerLat = farmerData['latitude'];
         final double farmerLng = farmerData['longitude'];
 
-        final distance = _calculateDistance(
+        final distance = calculateDistance(
           userLat,
           userLng,
           farmerLat,
@@ -375,29 +109,6 @@ Future<bool> validateIsNearest() async {
     }
   }
 
-  double _calculateDistance(
-    double lat1,
-    double lon1,
-    double lat2,
-    double lon2,
-  ) {
-    const R = 6371; // km
-    final dLat = _deg2rad(lat2 - lat1);
-    final dLon = _deg2rad(lon2 - lon1);
-
-    final a =
-        sin(dLat / 2) * sin(dLat / 2) +
-        cos(_deg2rad(lat1)) *
-            cos(_deg2rad(lat2)) *
-            sin(dLon / 2) *
-            sin(dLon / 2);
-    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
-    return R * c;
-  }
-
-  double _deg2rad(double deg) {
-    return deg * (pi / 180);
-  }
 
   Future<Position?> getCurrentLocation() async {
     try {
@@ -420,26 +131,26 @@ Future<bool> validateIsNearest() async {
     }
   }
 
-  Future<List<DocumentSnapshot>> getNearbyProducts() async {
-    final position = await getCurrentLocation();
-    if (position == null) return [];
+  // Future<List<DocumentSnapshot>> getNearbyProducts() async {
+  //   final position = await getCurrentLocation();
+  //   if (position == null) return [];
 
-    final query = await FirebaseFirestore.instance.collection("products").get();
-    return query.docs.where((doc) {
-      final data = doc.data();
-      final lat = data['latitude'];
-      final lng = data['longitude'];
-      if (lat == null || lng == null) return false;
+  //   final query = await FirebaseFirestore.instance.collection("products").get();
+  //   return query.docs.where((doc) {
+  //     final data = doc.data();
+  //     final lat = data['latitude'];
+  //     final lng = data['longitude'];
+  //     if (lat == null || lng == null) return false;
 
-      final distance = _calculateDistance(
-        position.latitude,
-        position.longitude,
-        lat,
-        lng,
-      );
-      return distance <= 5.0;
-    }).toList();
-  }
+  //     final distance = calculateDistance(
+  //       position.latitude,
+  //       position.longitude,
+  //       lat,
+  //       lng,
+  //     );
+  //     return distance <= 5.0;
+  //   }).toList();
+  // }
 
   @override
   Widget build(BuildContext context) {
