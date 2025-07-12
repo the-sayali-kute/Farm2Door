@@ -194,19 +194,6 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                     ),
                   ],
                 ),
-                Container(
-                  padding: EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: Colors.green,
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.star, color: Colors.white, size: 15),
-                      Text("Ratings", style: TextStyle(color: Colors.white)),
-                    ],
-                  ),
-                ),
               ],
             ),
             const SizedBox(height: 30),
@@ -247,29 +234,6 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                 ),
 
                 const SizedBox(width: 10),
-
-                // const Spacer(),
-                // Row(
-                //   children: [
-                //     IconButton(
-                //       icon: const Icon(Icons.remove),
-                //       onPressed: () {
-                //         setState(() {
-                //           if (quantity > 1) quantity--;
-                //         });
-                //       },
-                //     ),
-                //     Text('$quantity', style: const TextStyle(fontSize: 18)),
-                //     IconButton(
-                //       icon: const Icon(Icons.add),
-                //       onPressed: () {
-                //         setState(() {
-                //           quantity++;
-                //         });
-                //       },
-                //     ),
-                //   ],
-                // ),
               ],
             ),
             const SizedBox(height: 20),
