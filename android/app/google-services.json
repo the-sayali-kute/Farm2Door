@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "143611444960",
+    "project_id": "farm-to-door-auth",
+    "storage_bucket": "farm-to-door-auth.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:143611444960:android:da8319b8a16a6422b39a85",
+        "android_client_info": {
+          "package_name": "com.example.forms"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBieo2GxSPBsYm6uoPqI1akZGvwayMld4s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
