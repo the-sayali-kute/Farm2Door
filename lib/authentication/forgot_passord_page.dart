@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:forms/customer_home_page/appbar.dart';
 import 'package:forms/final_vars.dart';
+import 'package:forms/functions.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -56,12 +57,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("Enter your email to receive a password reset link."),
+            Text("Enter your email to receive a password reset link"),
             SizedBox(height: 20),
             TextField(
+              cursorColor: Colors.black,
               controller: emailController,
               decoration: InputDecoration(
                 labelText: "Email Address",
+                labelStyle: Theme.of(context).textTheme.bodyMedium,
                 border: border,
                 focusedBorder: border,
                 enabledBorder: border,
@@ -73,13 +76,68 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             // ✅ Button or loading indicator
             isLoading
                 ? CircularProgressIndicator()
-                : ElevatedButton(
-                    onPressed: resetPassword,
-                    child: Text("Send Reset Link"),
+                : Center(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(18),
+                        gradient: gradient,
+                      ),
+                      child: TextButton(
+                        onPressed: () async {
+                          _sendPasswordResetEmail(
+                            context,
+                            emailController.text,
+                          );
+                        },
+                        style: TextButton.styleFrom(
+                          minimumSize: Size(150, 50),
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                        ),
+                        child: Text(
+                          "Send Reset Link",
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
           ],
         ),
       ),
+    );
+  }
+}
+
+void _sendPasswordResetEmail(BuildContext context, String email) async {
+  if (email.trim().isEmpty || !email.contains('@')) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      errorBar("Please enter a valid email address.")
+    );
+    return;
+  }
+
+  try {
+    await FirebaseAuth.instance.sendPasswordResetEmail(email: email.trim());
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      successBar("Reset link sent! Please check your email.")
+    );
+  } on FirebaseAuthException catch (e) {
+    String errorMessage = "Something went wrong.";
+    if (e.code == 'user-not-found') {
+      errorMessage = "No user found for that email.";
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      errorBar(errorMessage)
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      errorBar("An error occurred. Please try again.")
     );
   }
 }
