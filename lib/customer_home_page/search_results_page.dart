@@ -59,64 +59,117 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: appBar(context, title: "Results for ${widget.searchQuery}"),
-      body: Column(
-        children: [
-          ProductFilterWidget(
-            onFilterChanged: _onFilterChanged,
-            initialFilter: _activeFilter,
-            initialSortOrder: _activeSortOrder,
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: results.isEmpty
-                ? const Center(child: Text('No products found'))
-                : ListView.builder(
-                    itemCount: results.length,
-                    itemBuilder: (context, index) {
-                      final product = results[index];
-                      debugPrint(
-                        "farmerId: ${product["farmerId"]}, type: ${product["farmerId"]?.runtimeType}",
-                      );
-                      debugPrint(
-                        "productName: ${product["productName"]}, type: ${product["productName"]?.runtimeType}",
-                      );
+      body: SafeArea(
+        child: Column(
+          children: [
+            // ProductFilterWidget(
+            //   onFilterChanged: _onFilterChanged,
+            //   initialFilter: _activeFilter,
+            //   initialSortOrder: _activeSortOrder,
+            // ),
+            ProductFilterWidget(
+              onFilterChanged: _onFilterChanged,
+              initialFilter: _activeFilter,
+              initialSortOrder: _activeSortOrder,
+            ),
 
-                      return FutureBuilder<String?>(
-                        future: getProductIdByFarmerAndName(
-                          farmerId:
-                              product["farmerId"] ??
-                              "8qoycpzhz4hCwQ1LBikoGw8861t2",
-                          productName: product["productName"].toString(),
-                        ),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return const CircularProgressIndicator(); // or SizedBox.shrink()
-                          }
+            const SizedBox(height: 10),
+            Expanded(
+              child: GridView.builder(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2, // 2 cards in one row
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 0.65, // Adjust based on ProductCard height
+                ),
+                itemCount: results.length,
+                itemBuilder: (context, index) {
+                  final product = results[index];
 
-                          return ProductCard(
-                            path: product["img"]?.toString() ?? "", // ✅
-                            productId: snapshot.data ?? "", // ✅
-                            productName:
-                                product["productName"]?.toString() ?? "", // ✅
-                            harvestedDate:
-                                product["harvestedDate"]?.toString() ?? "", // ✅
-                            farmerId:
-                                product["farmerId"]?.toString() ?? "", // ✅
-                            stock: product["stock"]?.toString() ?? "0", // ✅
-                            sellingPrice:
-                                product["sellingPrice"]?.toString() ?? "0", // ✅
-                            discountPercent:
-                                product["discountPercent"]?.toString() ??
-                                "0", // ✅
-                            unit: product["unit"]?.toString() ?? "", // ✅
-                            mrp: product["mrp"]?.toString() ?? "0", // ✅
-                          );
-                        },
+                  return FutureBuilder<String?>(
+                    future: getProductIdByFarmerAndName(
+                      farmerId: product["farmerId"] ?? "defaultFarmerId",
+                      productName: product["productName"]?.toString() ?? "",
+                    ),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) return const SizedBox.shrink();
+
+                      return ProductCard(
+                        path: product["img"]?.toString() ?? "",
+                        productId: snapshot.data ?? "",
+                        productName: product["productName"]?.toString() ?? "",
+                        harvestedDate:
+                            product["harvestedDate"]?.toString() ?? "",
+                        farmerId: product["farmerId"]?.toString() ?? "",
+                        stock: product["stock"]?.toString() ?? "0",
+                        sellingPrice:
+                            product["sellingPrice"]?.toString() ?? "0",
+                        discountPercent:
+                            product["discountPercent"]?.toString() ?? "0",
+                        unit: product["unit"]?.toString() ?? "",
+                        mrp: product["mrp"]?.toString() ?? "0",
                       );
                     },
-                  ),
-          ),
-        ],
+                  );
+                },
+              ),
+            ),
+
+            // Expanded(
+            //   child: results.isEmpty
+            //       ? const Center(child: Text('No products found'))
+            //       : ListView.builder(
+            //           itemCount: results.length,
+            //           itemBuilder: (context, index) {
+            //             final product = results[index];
+            //             debugPrint(
+            //               "farmerId: ${product["farmerId"]}, type: ${product["farmerId"]?.runtimeType}",
+            //             );
+            //             debugPrint(
+            //               "productName: ${product["productName"]}, type: ${product["productName"]?.runtimeType}",
+            //             );
+
+            //             return FutureBuilder<String?>(
+            //               future: getProductIdByFarmerAndName(
+            //                 farmerId:
+            //                     product["farmerId"] ??
+            //                     "8qoycpzhz4hCwQ1LBikoGw8861t2",
+            //                 productName: product["productName"].toString(),
+            //               ),
+            //               builder: (context, snapshot) {
+            //                 if (!snapshot.hasData) {
+            //                   return const CircularProgressIndicator(); // or SizedBox.shrink()
+            //                 }
+
+            //                 return ProductCard(
+            //                   path: product["img"]?.toString() ?? "", // ✅
+            //                   productId: snapshot.data ?? "", // ✅
+            //                   productName:
+            //                       product["productName"]?.toString() ?? "", // ✅
+            //                   harvestedDate:
+            //                       product["harvestedDate"]?.toString() ?? "", // ✅
+            //                   farmerId:
+            //                       product["farmerId"]?.toString() ?? "", // ✅
+            //                   stock: product["stock"]?.toString() ?? "0", // ✅
+            //                   sellingPrice:
+            //                       product["sellingPrice"]?.toString() ?? "0", // ✅
+            //                   discountPercent:
+            //                       product["discountPercent"]?.toString() ??
+            //                       "0", // ✅
+            //                   unit: product["unit"]?.toString() ?? "", // ✅
+            //                   mrp: product["mrp"]?.toString() ?? "0", // ✅
+            //                 );
+            //               },
+            //             );
+            //           },
+            //         ),
+            // ),
+          ],
+        ),
       ),
     );
   }

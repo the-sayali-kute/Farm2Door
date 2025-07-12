@@ -3,16 +3,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math';
 
 /// Enum for filter types
-enum ProductFilterType { price, distance, rating, discount}
+enum ProductFilterType { price, distance, rating, discount }
 
 /// Enum for sort order
 enum SortOrder { lowToHigh, highToLow }
 
 /// Callback signature for filter/sort changes
-typedef ProductFilterCallback = void Function({
-  ProductFilterType? filterType,
-  SortOrder? sortOrder,
-});
+typedef ProductFilterCallback =
+    void Function({ProductFilterType? filterType, SortOrder? sortOrder});
 
 /// Widget for filtering and sorting products
 class ProductFilterWidget extends StatefulWidget {
@@ -44,70 +42,115 @@ class _ProductFilterWidgetState extends State<ProductFilterWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        // Filter Dropdown
-        DropdownButton<ProductFilterType>(
-          value: _selectedFilter,
-          hint: const Text('Filter by',style: TextStyle(fontSize: 16),),
-          style: TextStyle(fontSize: 16, color: Colors.black),
-          items: const [
-            DropdownMenuItem(
-              value: ProductFilterType.price,
-              child: Text('Price'),
+    return Container(
+      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // 🔽 Filter Dropdown
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade300),
             ),
-            DropdownMenuItem(
-              value: ProductFilterType.distance,
-              child: Text('Distance'),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<ProductFilterType>(
+                value: _selectedFilter,
+                hint: const Text('Filter', style: TextStyle(fontSize: 16)),
+                style: const TextStyle(fontSize: 16, color: Colors.black),
+                items: const [
+                  DropdownMenuItem(
+                    value: ProductFilterType.price,
+                    child: Text('Price', style: TextStyle(fontSize: 16)),
+                  ),
+                  DropdownMenuItem(
+                    value: ProductFilterType.distance,
+                    child: Text('Distance', style: TextStyle(fontSize: 16)),
+                  ),
+                  DropdownMenuItem(
+                    value: ProductFilterType.rating,
+                    child: Text('Rating', style: TextStyle(fontSize: 16)),
+                  ),
+                  DropdownMenuItem(
+                    value: ProductFilterType.discount,
+                    child: Text('Discount', style: TextStyle(fontSize: 16)),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _selectedFilter = value;
+                  });
+                  widget.onFilterChanged(
+                    filterType: _selectedFilter,
+                    sortOrder: _selectedSortOrder,
+                  );
+                },
+              ),
             ),
-            DropdownMenuItem(
-              value: ProductFilterType.rating,
-              child: Text('Rating'),
-            ),
-            DropdownMenuItem(
-              value: ProductFilterType.discount,
-              child: Text('Discount'),
-            ),
-          ],
-          onChanged: (value) {
-            setState(() {
-              _selectedFilter = value;
-            });
-            widget.onFilterChanged(
-              filterType: _selectedFilter,
-              sortOrder: _selectedSortOrder,
-            );
-          },
-        ),
-        // Sort Order Toggle Button
-        Row(
-          children: [
-            const Text('Sort:',style: TextStyle(fontSize: 10),),
-            const SizedBox(width: 8),
-            ToggleButtons(
-              isSelected: [
-                _selectedSortOrder == SortOrder.lowToHigh,
-                _selectedSortOrder == SortOrder.highToLow,
-              ],
-              onPressed: (index) {
-                setState(() {
-                  _selectedSortOrder =
-                      index == 0 ? SortOrder.lowToHigh : SortOrder.highToLow;
-                });
-                widget.onFilterChanged(
-                  filterType: _selectedFilter,
-                  sortOrder: _selectedSortOrder,
-                );
-              },
-              children: const [
-                Text('Lower to Higher',style: TextStyle(fontSize: 10),),
-                Text('Higher to Lower',style: TextStyle(fontSize: 10),),
-              ],
-            ),
-          ],
-        ),
-      ],
+          ),
+
+          // 🟢 ChoiceChips for Sort
+          Wrap(
+            spacing: 8,
+            children: [
+              ChoiceChip(
+                label: const Text('↓ Low', style: TextStyle(fontSize: 16)),
+                selected: _selectedSortOrder == SortOrder.lowToHigh,
+                selectedColor: Colors.green,
+                backgroundColor: Colors.grey[200],
+                labelStyle: TextStyle(
+                  color: _selectedSortOrder == SortOrder.lowToHigh
+                      ? Colors.white
+                      : Colors.black,
+                ),
+                onSelected: (selected) {
+                  if (selected) {
+                    setState(() {
+                      _selectedSortOrder = SortOrder.lowToHigh;
+                    });
+                    widget.onFilterChanged(
+                      filterType: _selectedFilter,
+                      sortOrder: _selectedSortOrder,
+                    );
+                  }
+                },
+              ),
+              ChoiceChip(
+                label: const Text('↑ High', style: TextStyle(fontSize: 16)),
+                selected: _selectedSortOrder == SortOrder.highToLow,
+                selectedColor: Colors.green,
+                backgroundColor: Colors.grey[200],
+                labelStyle: TextStyle(
+                  color: _selectedSortOrder == SortOrder.highToLow
+                      ? Colors.white
+                      : Colors.black,
+                ),
+                onSelected: (selected) {
+                  if (selected) {
+                    setState(() {
+                      _selectedSortOrder = SortOrder.highToLow;
+                    });
+                    widget.onFilterChanged(
+                      filterType: _selectedFilter,
+                      sortOrder: _selectedSortOrder,
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -117,14 +160,17 @@ class _ProductFilterWidgetState extends State<ProductFilterWidget> {
 /// Usage:
 ///   Call fetchFilteredProducts with the selected filter and sort order.
 ///   For distance, you must provide the user's location and product locations.
-Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> fetchFilteredProducts({
+Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>>
+fetchFilteredProducts({
   ProductFilterType? filterType,
   SortOrder sortOrder = SortOrder.lowToHigh,
   // For distance filtering, pass user's location and implement logic as needed
   double? userLat,
   double? userLng,
 }) async {
-  Query<Map<String, dynamic>> query = FirebaseFirestore.instance.collection('products');
+  Query<Map<String, dynamic>> query = FirebaseFirestore.instance.collection(
+    'products',
+  );
 
   // For Firestore, sorting is done with orderBy
   String? orderByField;
@@ -157,7 +203,9 @@ Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> fetchFilteredProducts(
   List<QueryDocumentSnapshot<Map<String, dynamic>>> products = snapshot.docs;
 
   // For distance, sort in Dart if user location is provided
-  if (filterType == ProductFilterType.distance && userLat != null && userLng != null) {
+  if (filterType == ProductFilterType.distance &&
+      userLat != null &&
+      userLng != null) {
     products.sort((a, b) {
       double aLat = a['latitude'] ?? 0.0;
       double aLng = a['longitude'] ?? 0.0;
@@ -182,7 +230,8 @@ double _calculateDistance(double lat1, double lon1, double lat2, double lon2) {
   double dLon = _deg2rad(lon2 - lon1);
   double a =
       (sin(dLat / 2) * sin(dLat / 2)) +
-      cos(_deg2rad(lat1)) * cos(_deg2rad(lat2)) *
+      cos(_deg2rad(lat1)) *
+          cos(_deg2rad(lat2)) *
           (sin(dLon / 2) * sin(dLon / 2));
   double c = 2 * atan2(sqrt(a), sqrt(1 - a));
   double distance = R * c;
@@ -204,7 +253,7 @@ List<T> filterAndSortProducts<T>({
   required num Function(T) getDistance,
   required num Function(T) getRating,
   required num Function(T) getDiscount,
-  }) {
+}) {
   List<T> filtered = List<T>.from(products);
 
   // Sort based on selected filter
