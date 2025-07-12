@@ -15,30 +15,30 @@ class FarmerHomePage extends StatefulWidget {
 }
 
 class _FarmerHomePageState extends State<FarmerHomePage> {
-  List<Map<String, dynamic>> _products = [];
-  List<Map<String, dynamic>> _users = [];
-  List<Map<String, dynamic>> _orders = [];
+  // List<Map<String, dynamic>> _products = [];
+  // List<Map<String, dynamic>> _users = [];
+  // List<Map<String, dynamic>> _orders = [];
 
-  bool _isLoading = true;
-  Future<void> _loadAllData() async {
-    setState(() => _isLoading = true);
+  // bool _isLoading = true;
+  // Future<void> _loadAllData() async {
+  //   setState(() => _isLoading = true);
 
-    final products = await loadProducts();
-    final users = await loadUsers();
-    final orders = await loadOrders();
+  //   final products = await loadProducts();
+  //   final users = await loadUsers();
+  //   final orders = await loadOrders();
 
-    setState(() {
-      _products = products;
-      _users = users;
-      _orders = orders;
-      _isLoading = false;
-    });
-  }
+  //   setState(() {
+  //     _products = products;
+  //     _users = users;
+  //     _orders = orders;
+  //     _isLoading = false;
+  //   });
+  // }
 
   @override
   void initState() {
     super.initState();
-    _loadAllData();
+    // _loadAllData();
   }
 
   @override
@@ -46,12 +46,7 @@ class _FarmerHomePageState extends State<FarmerHomePage> {
     return Scaffold(
       appBar: appBar(context, logo: true, hamburger: true, add: true),
       drawer: HamburgerMenu(),
-      body: RefreshIndicator(
-        onRefresh: _loadAllData,
-        child: _isLoading
-            ? Center(child: CircularProgressIndicator())
-            : buildHomePage(), // You can pass _products/_users/_orders to buildHomePage if needed
-      ),
+      body:  buildHomePage(),
     );
   }
 }

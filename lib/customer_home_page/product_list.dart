@@ -255,6 +255,45 @@ class _ProductListState extends State<ProductList> {
     _loadProductsWithinRadius();
   }
 
+
+
+Future<bool> validateIsNearest() async {
+  final position = await getCurrentLocation();
+  if (position == null) return false;
+
+  final productsSnapshot = await FirebaseFirestore.instance.collection("products").get();
+
+  for (final productDoc in productsSnapshot.docs) {
+    final data = productDoc.data();
+    final farmerId = data['farmerId'];
+    if (farmerId == null) continue;
+
+    // Fetch farmer's location from users collection
+    final farmerDoc = await FirebaseFirestore.instance.collection("users").doc(farmerId).get();
+    final farmerData = farmerDoc.data();
+    if (farmerData == null || farmerData['latitude'] == null || farmerData['longitude'] == null) {
+      continue;
+    }
+
+    final double lat = farmerData['latitude'];
+    final double lng = farmerData['longitude'];
+
+    final distance = _calculateDistance(
+      position.latitude,
+      position.longitude,
+      lat,
+      lng,
+    );
+
+    if (distance <= 0.5) {
+      return true; // Found a product nearby
+    }
+  }
+
+  return false; // No nearby product
+}
+
+
   Future<void> _loadProductsWithinRadius() async {
     try {
       final userId = FirebaseAuth.instance.currentUser!.uid;
