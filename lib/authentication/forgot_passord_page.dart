@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:forms/customer_home_page/appbar.dart';
+import 'package:forms/final_vars.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -35,20 +37,20 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       );
 
       Navigator.maybePop(context);
-// Back to login screen
+      // Back to login screen
     } catch (e) {
       setState(() => isLoading = false);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("❌ ${e.toString()}")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("❌ ${e.toString()}")));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Forgot Password")),
+      appBar: appBar(context, title: "Forgot Password"),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -60,7 +62,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               controller: emailController,
               decoration: InputDecoration(
                 labelText: "Email Address",
-                border: OutlineInputBorder(),
+                border: border,
+                focusedBorder: border,
+                enabledBorder: border,
               ),
               keyboardType: TextInputType.emailAddress,
             ),
