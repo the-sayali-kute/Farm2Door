@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forms/farmer_home_page/farmer_home_page.dart';
 import 'package:forms/farmer_home_page/orders/farmer_order_page.dart';
 import 'package:forms/farmer_home_page/profile_page.dart';
 import 'package:forms/farmer_home_page/update_page.dart';
@@ -22,9 +23,9 @@ class _FarmerMainPageState extends State<FarmerMainPage> {
   }
 
   Future<void> _initialize() async {
-    setState(() {
-      pages = [FarmerMainPage() ,FarmerOrderPage(), UpdatePage(),ProfilePage()];
-    });
+    
+      pages = [FarmerHomePage() ,FarmerOrderPage(), UpdatePage(),ProfilePage()];
+    
   }  
 
   @override
@@ -65,7 +66,7 @@ class _FarmerMainPageState extends State<FarmerMainPage> {
       ),
     );
   }
-
+}
   Widget containerCard({required List<Widget> children}) {
     return Container(
       decoration: BoxDecoration(
@@ -77,5 +78,5 @@ class _FarmerMainPageState extends State<FarmerMainPage> {
       child: Column(children: children),
     );
   }
-}
+
 

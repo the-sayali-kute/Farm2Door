@@ -335,3 +335,92 @@ Stack stack({
     ],
   );
 }
+
+
+// Firestore functions for loading:
+
+
+final _firestore = FirebaseFirestore.instance;
+
+/// Load products from Firestore
+Future<List<Map<String, dynamic>>> loadProducts() async {
+  try {
+    final snapshot = await _firestore.collection('products').get();
+
+    return snapshot.docs.map((doc) {
+      final data = doc.data();
+      return {
+        'id': doc.id,
+        'productName': data['productName'],
+        'category': data['category'],
+        'img': data['img'],
+        'mrp': data['mrp'],
+        'sellingPrice': data['sellingPrice'],
+        'stock': data['stock'],
+        'unit': data['unit'],
+        'createdAt': data['createdAt'],
+        'updatedAt': data['updatedAt'] ?? "",
+        'farmerId': data['farmerId'],
+        'harvestedDate': data['harvestedDate'],
+        'discountPercent': data['discountPercent'],
+        'reviews': List<Map<String, dynamic>>.from(data['reviews'] ?? []),
+      };
+    }).toList();
+  } catch (e) {
+    debugPrint('Error loading products: $e');
+    return [];
+  }
+}
+
+
+/// Load users from Firestore
+Future<List<Map<String, dynamic>>> loadUsers() async {
+  try {
+    final snapshot = await _firestore.collection('users').get();
+
+    return snapshot.docs.map((doc) {
+      final data = doc.data();
+      // the fields which are not for buyers have value ""
+      return {
+        'id': doc.id,
+        'name': data['name'],
+        'email': data['email'],
+        'phone': data['phone'],
+        'role': data['role'],
+        'address': data['address'],
+        'revenue': data['revenue']??"",
+        'latitude': data['latitude'],
+        'longitude': data['longitude'],
+        'orders': data['orders']??"",
+        'totalStock': data['totalStock']??"",
+        'createdAt': data['createdAt'],
+      };
+    }).toList();
+  } catch (e) {
+    debugPrint('Error loading users: $e');
+    return [];
+  }
+}
+
+
+/// Load orders from Firestore
+Future<List<Map<String, dynamic>>> loadOrders() async {
+  try {
+    final snapshot = await _firestore.collection('orders').get();
+
+    return snapshot.docs.map((doc) {
+      final data = doc.data();
+      return {
+        'id': doc.id,
+        'userId': data['userId'],
+        'timestamp': data['timestamp'],
+        'totalAmount': data['totalAmount'],
+        'items': List<Map<String, dynamic>>.from(data['items'] ?? []),
+      };
+    }).toList();
+  } catch (e) {
+    debugPrint('Error loading orders: $e');
+    return [];
+  }
+}
+

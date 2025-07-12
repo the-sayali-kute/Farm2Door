@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:forms/customer_home_page/appbar.dart';
+import 'package:forms/customer_home_page/hamburger_menu.dart';
 import 'package:forms/farmer_home_page/edit_product.dart';
 import 'package:forms/final_vars.dart';
 import 'package:forms/functions.dart';
@@ -14,17 +15,43 @@ class FarmerHomePage extends StatefulWidget {
 }
 
 class _FarmerHomePageState extends State<FarmerHomePage> {
+  List<Map<String, dynamic>> _products = [];
+  List<Map<String, dynamic>> _users = [];
+  List<Map<String, dynamic>> _orders = [];
+
+  bool _isLoading = true;
+  Future<void> _loadAllData() async {
+    setState(() => _isLoading = true);
+
+    final products = await loadProducts();
+    final users = await loadUsers();
+    final orders = await loadOrders();
+
+    setState(() {
+      _products = products;
+      _users = users;
+      _orders = orders;
+      _isLoading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAllData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: appBar(
-        context,
-        title: "Farm2Door",
-        logo: true,
-        add: true,
-        hamburger: true,
+      appBar: appBar(context, logo: true, hamburger: true, add: true),
+      drawer: HamburgerMenu(),
+      body: RefreshIndicator(
+        onRefresh: _loadAllData,
+        child: _isLoading
+            ? Center(child: CircularProgressIndicator())
+            : buildHomePage(), // You can pass _products/_users/_orders to buildHomePage if needed
       ),
-      body: buildHomePage(),
     );
   }
 }
@@ -273,12 +300,12 @@ Widget productCard(DocumentSnapshot productDoc, BuildContext context) {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text("Cancel",style: TextStyle(color: Colors.black),),
+            child: Text("Cancel", style: TextStyle(color: Colors.black)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: Text("Delete",style: TextStyle(color: Colors.white),),
+            child: Text("Delete", style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -315,8 +342,7 @@ Widget productCard(DocumentSnapshot productDoc, BuildContext context) {
         radius: 25,
         backgroundImage: data['img'] != null && data['img'].isNotEmpty
             ? NetworkImage(data['img'])
-            : AssetImage('assets/images/default_products.png')
-                as ImageProvider,
+            : AssetImage('assets/images/default_products.png') as ImageProvider,
       ),
       title: Text(
         data['productName'],
@@ -342,8 +368,7 @@ Widget productCard(DocumentSnapshot productDoc, BuildContext context) {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) =>
-                    EditProduct(productId: productDoc.id),
+                builder: (context) => EditProduct(productId: productDoc.id),
               ),
             );
           } else if (value == 'delete') {
@@ -376,7 +401,6 @@ Widget productCard(DocumentSnapshot productDoc, BuildContext context) {
     ),
   );
 }
-
 
 Widget placeholderBox(String text) {
   return Container(

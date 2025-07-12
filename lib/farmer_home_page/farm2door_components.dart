@@ -272,7 +272,7 @@ class _SelectProfilePhotoState extends State<SelectProfilePhoto> {
               backgroundColor: Colors.grey[300],
               backgroundImage: ProfileDataCollector.profilePhoto != null
                   ? FileImage(ProfileDataCollector.profilePhoto!)
-                  : const AssetImage('assets/default_products.png') as ImageProvider,
+                  : const AssetImage('assets/images/default_products.png') as ImageProvider,
             ),
             Positioned(
               bottom: 0,

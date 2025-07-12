@@ -39,6 +39,15 @@ class FarmerOrderPage extends StatelessWidget {
 
       builder: (context, snapshot) {
         final currentFarmerId = FirebaseAuth.instance.currentUser!.uid;
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return NoOrders(msg: "No orders yet!",showOption: false,);
+        }
+
         final allOrders = snapshot.data!.docs;
 
         final relevantOrders = allOrders.where((order) {
@@ -48,14 +57,6 @@ class FarmerOrderPage extends StatelessWidget {
 
         if (relevantOrders.isEmpty) {
           return NoOrders(msg: "No orders yet!",showOption:false);
-        }
-
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return NoOrders(msg: "No orders yet!",showOption: false,);
         }
 
         return Scaffold(
