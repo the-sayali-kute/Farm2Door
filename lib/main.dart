@@ -2,8 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:forms/customer_home_page/customer_home_page.dart';
-import 'package:forms/farmer_home_page/farmer_main_page.dart';
 import 'package:forms/firebase_options.dart';
 import 'package:forms/landing_page.dart';
 

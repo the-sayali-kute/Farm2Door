@@ -76,7 +76,6 @@ class _SearchPageState extends State<SearchPage> {
   }
 }*/
 
-
 //revised code with integrated search filters
 
 import 'package:flutter/material.dart';
@@ -107,20 +106,28 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Future<void> _loadProducts() async {
-    final fetched = await getProductNames(); // Expects List<Map<String, dynamic>>
+    final fetched =
+        await getProductNames(); // Expects List<Map<String, dynamic>>
     if (fetched == null) return;
 
-    List<Map<String, dynamic>> loaded = List<Map<String, dynamic>>.from(fetched);
+    List<Map<String, dynamic>> loaded = List<Map<String, dynamic>>.from(
+      fetched,
+    );
 
     // Optional: Add distance if needed
     Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
+      desiredAccuracy: LocationAccuracy.high,
+    );
 
     for (var product in loaded) {
       double lat = product['latitude'] ?? 0.0;
       double lng = product['longitude'] ?? 0.0;
-      product['distance'] =
-          _calculateDistance(position.latitude, position.longitude, lat, lng);
+      product['distance'] = _calculateDistance(
+        position.latitude,
+        position.longitude,
+        lat,
+        lng,
+      );
     }
 
     setState(() {
@@ -129,10 +136,7 @@ class _SearchPageState extends State<SearchPage> {
     });
   }
 
-  void _onFilterChanged({
-    ProductFilterType? filterType,
-    SortOrder? sortOrder,
-  }) {
+  void _onFilterChanged({ProductFilterType? filterType, SortOrder? sortOrder}) {
     setState(() {
       _activeFilter = filterType;
       _activeSortOrder = sortOrder ?? SortOrder.lowToHigh;
@@ -159,7 +163,6 @@ class _SearchPageState extends State<SearchPage> {
             margin: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               children: [
-
                 /// 🔍 Search Bar
                 SearchAnchor.bar(
                   searchController: searchController,
@@ -172,30 +175,38 @@ class _SearchPageState extends State<SearchPage> {
                     ),
                   ),
                   onTap: () {},
-
-                  /// 🔎 Suggestions
                   suggestionsBuilder: (context, controller) {
-                    final query = controller.text.toLowerCase();
-                    final filtered = filteredProducts
-                        .where((product) =>
-                            product['name'].toLowerCase().contains(query))
-                        .toList();
+                    final query = controller.text.toLowerCase().trim();
 
                     if (query.isEmpty) return const [];
 
-                    return List.generate(filtered.length, (index) {
+                    final results = filteredProducts.where((product) {
+                      final name = (product['productName'] ?? '')
+                          .toString()
+                          .toLowerCase();
+                      return name.contains(query);
+                    }).toList();
+
+                    if (results.isEmpty) {
+                      return [
+                        const ListTile(title: Text('No matching products')),
+                      ];
+                    }
+
+                    return results.map((product) {
                       return ListTile(
-                        title: Text(filtered[index]['name']),
+                        title: Text(product['productName'] ?? 'Unnamed'),
                         subtitle: Text(
-                            "Price: ₹${filtered[index]['sellingPrice'] ?? 'N/A'}"),
+                          "Price: ₹${product['sellingPrice'] ?? 'N/A'}",
+                        ),
                         onTap: () {
-                          controller.closeView(filtered[index]['name']);
-                          controller.text = filtered[index]['name'];
-                          // Navigate to product detail if needed
+                          controller.closeView(product['productName']);
+                          controller.text = product['productName'];
+                          // Optional: Trigger filter or detail page
                           setState(() {});
                         },
                       );
-                    });
+                    }).toList();
                   },
                 ),
                 const SizedBox(height: 20),
@@ -217,11 +228,16 @@ class _SearchPageState extends State<SearchPage> {
 
   /// 📍 Utility to calculate distance
   double _calculateDistance(
-      double lat1, double lon1, double lat2, double lon2) {
+    double lat1,
+    double lon1,
+    double lat2,
+    double lon2,
+  ) {
     const double R = 6371; // Radius of the earth in km
     double dLat = _deg2rad(lat2 - lat1);
     double dLon = _deg2rad(lon2 - lon1);
-    double a = (sin(dLat / 2) * sin(dLat / 2)) +
+    double a =
+        (sin(dLat / 2) * sin(dLat / 2)) +
         cos(_deg2rad(lat1)) *
             cos(_deg2rad(lat2)) *
             (sin(dLon / 2) * sin(dLon / 2));

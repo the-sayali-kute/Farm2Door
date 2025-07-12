@@ -25,8 +25,6 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
 
   }
 
-  
-
   Future<void> _initialize() async {
     // path = await addToCart(path: "", totalCartItems: 0);
     setState(() {
