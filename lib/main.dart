@@ -1,21 +1,27 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:forms/firebase_options.dart';
-import 'package:forms/landing_page.dart';
-import 'package:forms/logged_in_user_landing_page.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';import 'firebase_options.dart';
+import 'landing_page.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: binding);
   debugPrintGestureArenaDiagnostics = false;
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Future.delayed(Duration(seconds: 7));
+  FlutterNativeSplash.remove();
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -23,7 +29,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         fontFamily: "Nunito",
         useMaterial3: true,
-        textTheme: TextTheme(
+        textTheme: const TextTheme(
           titleLarge: TextStyle(fontSize: 35, fontWeight: FontWeight.w900),
           bodyMedium: TextStyle(fontSize: 15),
           titleMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
@@ -35,18 +41,61 @@ class MyApp extends StatelessWidget {
           primary: Color.fromRGBO(142, 231, 179, 1),
         ),
       ),
-      home: StreamBuilder(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.data != null) {
-            return const LoggedInUserLandingPage(role: 'farmer');
-          }
-          return const LandingPage();
-        },
-      ),
+      home: LandingPage(),
+    );
+  }
+}
+
+
+// import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:flutter/gestures.dart';
+// import 'package:flutter/material.dart';
+// import 'package:forms/firebase_options.dart';
+// import 'package:forms/landing_page.dart';
+// import 'package:forms/logged_in_user_landing_page.dart';
+
+// void main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   debugPrintGestureArenaDiagnostics = false;
+//   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+//   runApp(const MyApp());
+// }
+
+// class MyApp extends StatelessWidget {
+//   const MyApp({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       debugShowCheckedModeBanner: false,
+//       theme: ThemeData(
+//         fontFamily: "Nunito",
+//         useMaterial3: true,
+//         textTheme: TextTheme(
+//           titleLarge: TextStyle(fontSize: 35, fontWeight: FontWeight.w900),
+//           bodyMedium: TextStyle(fontSize: 15),
+//           titleMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+//           titleSmall: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
+//           bodySmall: TextStyle(fontSize: 10),
+//         ),
+//         colorScheme: ColorScheme.fromSeed(
+//           seedColor: Color.fromRGBO(102, 200, 143, 1),
+//           primary: Color.fromRGBO(142, 231, 179, 1),
+//         ),
+//       ),
+//       home: StreamBuilder(
+//         stream: FirebaseAuth.instance.authStateChanges(),
+//         builder: (context, snapshot) {
+//           if (snapshot.connectionState == ConnectionState.waiting) {
+//             return const Center(child: CircularProgressIndicator());
+//           }
+//           if (snapshot.data != null) {
+//             return const LoggedInUserLandingPage(role: 'farmer');
+//           }
+//           return const LandingPage();
+//         },
+//       ),
 
       // authStateChanges() returns stream of users that can be null. It's benefit is that it is a stream - a continuous real time v
       // value which updates whenever the user is sign in or sign out, this implementation is async. So, whenever user changes we've real
@@ -66,9 +115,9 @@ class MyApp extends StatelessWidget {
       //     return LandingPage();
       //   },
       // ),
-    );
-  }
-}
+//     );
+//   }
+// }
 
 // StreamBuilder<User?>(
 //         stream: FirebaseAuth.instance.authStateChanges(),

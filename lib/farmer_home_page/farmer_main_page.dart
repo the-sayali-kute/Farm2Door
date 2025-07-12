@@ -24,7 +24,7 @@ class _FarmerMainPageState extends State<FarmerMainPage> {
 
   Future<void> _initialize() async {
     
-      pages = [FarmerHomePage() ,FarmerOrderPage(), UpdatePage(),ProfilePage()];
+      pages = [FarmerHomePage() ,FarmerOrderPage(), UpdatePage()];
     
   }  
 
@@ -53,10 +53,6 @@ class _FarmerMainPageState extends State<FarmerMainPage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.assignment_outlined),
             label: "Orders",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.update),
-            label: "Updates",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.update),

@@ -91,7 +91,7 @@ AppBar appBar(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(40),
               child: Image.asset(
-                "assets/images/logo.jpeg",
+                "assets/images/logo.jpg",
                 width: 40,
                 height: 40,
                 fit: BoxFit.cover,
