@@ -250,11 +250,12 @@ class _SearchPageState extends State<SearchPage> {
 //   }
 // }
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:forms/authentication/db_functions.dart';
 import 'package:forms/customer_home_page/search_results_page.dart';
 import 'package:geolocator/geolocator.dart';
-import 'dart:math';// ⬅️ Import this
+import 'dart:math'; // ⬅️ Import this
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -274,26 +275,54 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Future<void> _loadProducts() async {
-    // TODO: Replace with your actual data fetch method
     final fetched = await getProductNames(); // List<Map<String, dynamic>>
     if (fetched == null) return;
 
-    List<Map<String, dynamic>> loaded = List<Map<String, dynamic>>.from(fetched);
+    List<Map<String, dynamic>> loaded = List<Map<String, dynamic>>.from(
+      fetched,
+    );
 
-    // Add distance calculation
+    // Get current user location
     Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
 
+    // Fetch farmer lat/lng for each product
     for (var product in loaded) {
-      double lat = product['latitude'] ?? 0.0;
-      double lng = product['longitude'] ?? 0.0;
-      product['distance'] = _calculateDistance(
-        position.latitude,
-        position.longitude,
-        lat,
-        lng,
-      );
+      try {
+        final farmerId = product['farmerId'];
+        if (farmerId == null) {
+          product['distance'] = double.infinity;
+          continue;
+        }
+
+        final farmerSnapshot = await FirebaseFirestore.instance
+            .collection("users")
+            .doc(farmerId)
+            .get();
+
+        if (farmerSnapshot.exists) {
+          final farmerData = farmerSnapshot.data();
+          final lat = farmerData?['latitude'];
+          final lng = farmerData?['longitude'];
+
+          if (lat != null && lng != null) {
+            product['distance'] = _calculateDistance(
+              position.latitude,
+              position.longitude,
+              lat,
+              lng,
+            );
+          } else {
+            product['distance'] = double.infinity;
+          }
+        } else {
+          product['distance'] = double.infinity;
+        }
+      } catch (e) {
+        debugPrint("Error getting farmer location: $e");
+        product['distance'] = double.infinity;
+      }
     }
 
     setState(() {
@@ -379,7 +408,8 @@ class _SearchPageState extends State<SearchPage> {
     const double R = 6371; // km
     double dLat = _deg2rad(lat2 - lat1);
     double dLon = _deg2rad(lon2 - lon1);
-    double a = sin(dLat / 2) * sin(dLat / 2) +
+    double a =
+        sin(dLat / 2) * sin(dLat / 2) +
         cos(_deg2rad(lat1)) *
             cos(_deg2rad(lat2)) *
             sin(dLon / 2) *
