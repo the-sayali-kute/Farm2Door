@@ -45,6 +45,29 @@ Future<List<Map<String,dynamic>>>? getProductNames() async{
   }
 }
 
+Future<String?> getProductIdByFarmerAndName({
+  required String farmerId,
+  required String productName,
+}) async {
+  try {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('products')
+        .where('farmerId', isEqualTo: farmerId)
+        .where('productName', isEqualTo: productName)
+        .limit(1)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      return querySnapshot.docs.first.id; // ✅ Return the product document ID
+    } else {
+      return null; // No match found
+    }
+  } catch (e) {
+    debugPrint('Error getting product ID: $e');
+    return null;
+  }
+}
+
 Future<String> addToCart({required String path,required int totalCartItems})async{
   if(path == ""){
     return path;

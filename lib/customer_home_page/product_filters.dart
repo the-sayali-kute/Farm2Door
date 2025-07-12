@@ -50,7 +50,8 @@ class _ProductFilterWidgetState extends State<ProductFilterWidget> {
         // Filter Dropdown
         DropdownButton<ProductFilterType>(
           value: _selectedFilter,
-          hint: const Text('Filter by',style: TextStyle(fontSize: 10),),
+          hint: const Text('Filter by',style: TextStyle(fontSize: 16),),
+          style: TextStyle(fontSize: 16, color: Colors.black),
           items: const [
             DropdownMenuItem(
               value: ProductFilterType.price,

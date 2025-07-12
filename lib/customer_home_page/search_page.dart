@@ -78,11 +78,183 @@ class _SearchPageState extends State<SearchPage> {
 
 //revised code with integrated search filters
 
+// import 'package:flutter/material.dart';
+// import 'package:forms/authentication/db_functions.dart';
+// import 'package:forms/customer_home_page/product_filters.dart';
+// import 'package:geolocator/geolocator.dart';
+// import 'dart:math';
+
+// class SearchPage extends StatefulWidget {
+//   const SearchPage({super.key});
+
+//   @override
+//   State<SearchPage> createState() => _SearchPageState();
+// }
+
+// class _SearchPageState extends State<SearchPage> {
+//   List<Map<String, dynamic>> products = [];
+//   List<Map<String, dynamic>> filteredProducts = [];
+//   final SearchController searchController = SearchController();
+
+//   ProductFilterType? _activeFilter;
+//   SortOrder _activeSortOrder = SortOrder.lowToHigh;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _loadProducts();
+//   }
+
+//   Future<void> _loadProducts() async {
+//     final fetched =
+//         await getProductNames(); // Expects List<Map<String, dynamic>>
+//     if (fetched == null) return;
+
+//     List<Map<String, dynamic>> loaded = List<Map<String, dynamic>>.from(
+//       fetched,
+//     );
+
+//     // Optional: Add distance if needed
+//     Position position = await Geolocator.getCurrentPosition(
+//       desiredAccuracy: LocationAccuracy.high,
+//     );
+
+//     for (var product in loaded) {
+//       double lat = product['latitude'] ?? 0.0;
+//       double lng = product['longitude'] ?? 0.0;
+//       product['distance'] = _calculateDistance(
+//         position.latitude,
+//         position.longitude,
+//         lat,
+//         lng,
+//       );
+//     }
+
+//     setState(() {
+//       products = loaded;
+//       filteredProducts = List.from(products); // Initially no filters
+//     });
+//   }
+
+//   void _onFilterChanged({ProductFilterType? filterType, SortOrder? sortOrder}) {
+//     setState(() {
+//       _activeFilter = filterType;
+//       _activeSortOrder = sortOrder ?? SortOrder.lowToHigh;
+
+//       filteredProducts = filterAndSortProducts<Map<String, dynamic>>(
+//         products: products,
+//         filterType: _activeFilter,
+//         sortOrder: _activeSortOrder,
+//         getPrice: (p) => p['sellingPrice'] ?? 0,
+//         getRating: (p) => p['rating'] ?? 0,
+//         getDistance: (p) => p['distance'] ?? 0,
+//         getDiscount: (p) => p['discountPercent'] ?? 0,
+//       );
+//     });
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       body: TextSelectionTheme(
+//         data: const TextSelectionThemeData(cursorColor: Colors.black),
+//         child: SafeArea(
+//           child: Container(
+//             margin: const EdgeInsets.symmetric(horizontal: 20),
+//             child: Column(
+//               children: [
+//                 /// 🔍 Search Bar
+//                 SearchAnchor.bar(
+//                   searchController: searchController,
+//                   barHintText: 'Search fruits...',
+//                   barLeading: const Icon(Icons.search),
+//                   barElevation: const WidgetStatePropertyAll(0),
+//                   barShape: WidgetStatePropertyAll(
+//                     RoundedRectangleBorder(
+//                       borderRadius: BorderRadius.circular(20),
+//                     ),
+//                   ),
+//                   onTap: () {},
+//                   suggestionsBuilder: (context, controller) {
+//                     final query = controller.text.toLowerCase().trim();
+
+//                     if (query.isEmpty) return const [];
+
+//                     final results = filteredProducts.where((product) {
+//                       final name = (product['productName'] ?? '')
+//                           .toString()
+//                           .toLowerCase();
+//                       return name.contains(query);
+//                     }).toList();
+
+//                     if (results.isEmpty) {
+//                       return [
+//                         const ListTile(title: Text('No matching products')),
+//                       ];
+//                     }
+
+//                     return results.map((product) {
+//                       return ListTile(
+//                         title: Text(product['productName'] ?? 'Unnamed'),
+//                         subtitle: Text(
+//                           "Price: ₹${product['sellingPrice'] ?? 'N/A'}",
+//                         ),
+//                         onTap: () {
+//                           controller.closeView(product['productName']);
+//                           controller.text = product['productName'];
+//                           // Optional: Trigger filter or detail page
+//                           setState(() {});
+//                         },
+//                       );
+//                     }).toList();
+//                   },
+//                 ),
+//                 const SizedBox(height: 20),
+
+//                 /// 🔍 Filter Widget
+//                 ProductFilterWidget(
+//                   onFilterChanged: _onFilterChanged,
+//                   initialFilter: _activeFilter,
+//                   initialSortOrder: _activeSortOrder,
+//                 ),
+//                 const SizedBox(height: 10),
+//               ],
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+
+//   /// 📍 Utility to calculate distance
+//   double _calculateDistance(
+//     double lat1,
+//     double lon1,
+//     double lat2,
+//     double lon2,
+//   ) {
+//     const double R = 6371; // Radius of the earth in km
+//     double dLat = _deg2rad(lat2 - lat1);
+//     double dLon = _deg2rad(lon2 - lon1);
+//     double a =
+//         (sin(dLat / 2) * sin(dLat / 2)) +
+//         cos(_deg2rad(lat1)) *
+//             cos(_deg2rad(lat2)) *
+//             (sin(dLon / 2) * sin(dLon / 2));
+//     double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+//     return R * c;
+//   }
+
+//   double _deg2rad(double deg) {
+//     return deg * (3.1415926535897932 / 180.0);
+//   }
+// }
+
 import 'package:flutter/material.dart';
 import 'package:forms/authentication/db_functions.dart';
-import 'package:forms/customer_home_page/product_filters.dart';
+import 'package:forms/customer_home_page/search_results_page.dart';
 import 'package:geolocator/geolocator.dart';
-import 'dart:math';
+import 'dart:math';// ⬅️ Import this
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -93,11 +265,7 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   List<Map<String, dynamic>> products = [];
-  List<Map<String, dynamic>> filteredProducts = [];
   final SearchController searchController = SearchController();
-
-  ProductFilterType? _activeFilter;
-  SortOrder _activeSortOrder = SortOrder.lowToHigh;
 
   @override
   void initState() {
@@ -106,15 +274,13 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Future<void> _loadProducts() async {
-    final fetched =
-        await getProductNames(); // Expects List<Map<String, dynamic>>
+    // TODO: Replace with your actual data fetch method
+    final fetched = await getProductNames(); // List<Map<String, dynamic>>
     if (fetched == null) return;
 
-    List<Map<String, dynamic>> loaded = List<Map<String, dynamic>>.from(
-      fetched,
-    );
+    List<Map<String, dynamic>> loaded = List<Map<String, dynamic>>.from(fetched);
 
-    // Optional: Add distance if needed
+    // Add distance calculation
     Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
@@ -132,24 +298,6 @@ class _SearchPageState extends State<SearchPage> {
 
     setState(() {
       products = loaded;
-      filteredProducts = List.from(products); // Initially no filters
-    });
-  }
-
-  void _onFilterChanged({ProductFilterType? filterType, SortOrder? sortOrder}) {
-    setState(() {
-      _activeFilter = filterType;
-      _activeSortOrder = sortOrder ?? SortOrder.lowToHigh;
-
-      filteredProducts = filterAndSortProducts<Map<String, dynamic>>(
-        products: products,
-        filterType: _activeFilter,
-        sortOrder: _activeSortOrder,
-        getPrice: (p) => p['sellingPrice'] ?? 0,
-        getRating: (p) => p['rating'] ?? 0,
-        getDistance: (p) => p['distance'] ?? 0,
-        getDiscount: (p) => p['discountPercent'] ?? 0,
-      );
     });
   }
 
@@ -163,7 +311,7 @@ class _SearchPageState extends State<SearchPage> {
             margin: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               children: [
-                /// 🔍 Search Bar
+                const SizedBox(height: 20),
                 SearchAnchor.bar(
                   searchController: searchController,
                   barHintText: 'Search fruits...',
@@ -174,13 +322,11 @@ class _SearchPageState extends State<SearchPage> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  onTap: () {},
                   suggestionsBuilder: (context, controller) {
                     final query = controller.text.toLowerCase().trim();
-
                     if (query.isEmpty) return const [];
 
-                    final results = filteredProducts.where((product) {
+                    final results = products.where((product) {
                       final name = (product['productName'] ?? '')
                           .toString()
                           .toLowerCase();
@@ -196,28 +342,26 @@ class _SearchPageState extends State<SearchPage> {
                     return results.map((product) {
                       return ListTile(
                         title: Text(product['productName'] ?? 'Unnamed'),
-                        subtitle: Text(
-                          "Price: ₹${product['sellingPrice'] ?? 'N/A'}",
-                        ),
+                        subtitle: Text("₹${product['sellingPrice'] ?? 'N/A'}"),
                         onTap: () {
                           controller.closeView(product['productName']);
                           controller.text = product['productName'];
-                          // Optional: Trigger filter or detail page
-                          setState(() {});
+
+                          // ⬇️ Navigate to results page
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => SearchResultsPage(
+                                allProducts: products,
+                                searchQuery: product['productName'],
+                              ),
+                            ),
+                          );
                         },
                       );
                     }).toList();
                   },
                 ),
-                const SizedBox(height: 20),
-
-                /// 🔍 Filter Widget
-                ProductFilterWidget(
-                  onFilterChanged: _onFilterChanged,
-                  initialFilter: _activeFilter,
-                  initialSortOrder: _activeSortOrder,
-                ),
-                const SizedBox(height: 10),
               ],
             ),
           ),
@@ -226,30 +370,28 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  /// 📍 Utility to calculate distance
   double _calculateDistance(
     double lat1,
     double lon1,
     double lat2,
     double lon2,
   ) {
-    const double R = 6371; // Radius of the earth in km
+    const double R = 6371; // km
     double dLat = _deg2rad(lat2 - lat1);
     double dLon = _deg2rad(lon2 - lon1);
-    double a =
-        (sin(dLat / 2) * sin(dLat / 2)) +
+    double a = sin(dLat / 2) * sin(dLat / 2) +
         cos(_deg2rad(lat1)) *
             cos(_deg2rad(lat2)) *
-            (sin(dLon / 2) * sin(dLon / 2));
+            sin(dLon / 2) *
+            sin(dLon / 2);
     double c = 2 * atan2(sqrt(a), sqrt(1 - a));
     return R * c;
   }
 
   double _deg2rad(double deg) {
-    return deg * (3.1415926535897932 / 180.0);
+    return deg * (pi / 180);
   }
 }
-
 
 
 
