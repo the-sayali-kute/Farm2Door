@@ -87,6 +87,40 @@ class OrderDetailsPage extends StatelessWidget {
     }
   }
 
+Future<void> handleCompleted(String orderId, Map<String, dynamic> product, BuildContext context) async {
+  final orderRef = FirebaseFirestore.instance.collection('orders').doc(orderId);
+  final snapshot = await orderRef.get();
+  final data = snapshot.data();
+  if (data == null) return;
+
+  List<Map<String, dynamic>> items = List<Map<String, dynamic>>.from(data['items']);
+  final index = items.indexWhere(
+    (i) =>
+        i['productName'] == product['productName'] &&
+        i['farmerId'] == product['farmerId'],
+  );
+
+  if (index != -1) {
+    items[index]['status'] = 'completed';
+    await orderRef.update({'items': items});
+
+    // Send message logic (here it's a snackbar as a placeholder)
+    final userPhone = await getPhoneNumber(orderId);
+    if (userPhone != null) {
+      final message = Uri.encodeComponent("Hello! Your order for ${product['productName']} has been delivered. Thank you for shopping with us!");
+      final whatsappUrl = Uri.parse("https://wa.me/$userPhone?text=$message");
+
+      if (await canLaunchUrl(whatsappUrl)) {
+        await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Could not open WhatsApp")),
+        );
+      }
+    }
+  }
+}
+
   Future<void> showBuyerLocation(BuildContext context, String userId) async {
     try {
       // Step 1: Get user's location from Firestore
@@ -306,6 +340,7 @@ class OrderDetailsPage extends StatelessWidget {
                           await handleReject(orderId, product),
                       onGetLocation: () async =>
                           showBuyerLocation(context, product['userId']),
+                      onCompleted: () async => await handleCompleted(orderId, product, context),
                     ),
                   ),
                 ],

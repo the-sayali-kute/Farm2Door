@@ -221,7 +221,7 @@ class _ProductCardState extends State<ProductCard> {
       lng,
     );
 
-    if (distance <= 0.5) {
+    if (distance <= 1.0) {
       if (mounted) {
         setState(() {
           isNearest = true;
