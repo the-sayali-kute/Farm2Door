@@ -127,7 +127,7 @@ class _EditProductState extends State<EditProduct> {
         selectedUnit = data['unit'];
         mrpController.text = data['mrp'].toString();
         spController.text = data['sellingPrice'].toString();
-        stockController.text = data['stock'].toString();
+        stockController.text = data['originalStock'].toString();
         discount = data['discountPercent'] ?? 0;
         isOrganic = data['isOrganic'] ?? false;
         pesticidesUsed = data['anyPesticides'] ?? false;
@@ -150,7 +150,7 @@ class _EditProductState extends State<EditProduct> {
         'mrp': double.parse(mrpController.text),
         'sellingPrice': double.parse(spController.text),
         'discountPercent': discount,
-        'stock': int.parse(stockController.text),
+        'originalStock': int.parse(stockController.text),
         'isOrganic': isOrganic,
         'anyPesticides': pesticidesUsed,
         'img': imageUrlController.text,

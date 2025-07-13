@@ -533,10 +533,6 @@ class _AddProductPage extends State<AddProductPage> {
                         'farmerId': FirebaseAuth.instance.currentUser!.uid,
                       };
 
-                      if (imageUrl != null) {
-                        productData['img'] = imageUrl;
-                      }
-
                       await FirebaseFirestore.instance
                           .collection('products')
                           .add(productData);
