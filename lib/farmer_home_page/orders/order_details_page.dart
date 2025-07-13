@@ -90,41 +90,74 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       items[index]['status'] = 'rejected';
       await orderRef.update({'items': items});
     }
-  }
+    if (index != -1) {
+      items[index]['status'] = 'rejected';
+      await orderRef.update({'items': items});
 
-  Future<void> handleCompleted(String orderId, Map<String, dynamic> product, BuildContext context) async {
-  final orderRef = FirebaseFirestore.instance.collection('orders').doc(orderId);
-  final snapshot = await orderRef.get();
-  final data = snapshot.data();
-  if (data == null) return;
-
-  List<Map<String, dynamic>> items = List<Map<String, dynamic>>.from(data['items']);
-  final index = items.indexWhere(
-    (i) =>
-        i['productName'] == product['productName'] &&
-        i['farmerId'] == product['farmerId'],
-  );
-
-  if (index != -1) {
-    items[index]['status'] = 'completed';
-    await orderRef.update({'items': items});
-
-    // Send message logic (here it's a snackbar as a placeholder)
-    final userPhone = await getPhoneNumber(orderId);
-    if (userPhone != null) {
-      final message = Uri.encodeComponent("Hello! Your order for ${product['productName']} has been delivered. Thank you for shopping with us!");
-      final whatsappUrl = Uri.parse("https://wa.me/$userPhone?text=$message");
-
-      if (await canLaunchUrl(whatsappUrl)) {
-        await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Could not open WhatsApp")),
+      // Send message logic (here it's a snackbar as a placeholder)
+      final userPhone = await getPhoneNumber(orderId);
+      if (userPhone != null) {
+        final message = Uri.encodeComponent(
+          "Hello,\n\nWe're sorry to inform you that your order for *${product['productName']}* has been *rejected* ❌ by the farmer, possibly due to low stock or unavailability.\n\nPlease feel free to explore other fresh items on Farm2Door. 🛒🌿",
         );
+
+        final whatsappUrl = Uri.parse("https://wa.me/$userPhone?text=$message");
+
+        if (await canLaunchUrl(whatsappUrl)) {
+          await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Could not open WhatsApp")),
+          );
+        }
       }
     }
   }
-}
+
+  Future<void> handleCompleted(
+    String orderId,
+    Map<String, dynamic> product,
+    BuildContext context,
+  ) async {
+    final orderRef = FirebaseFirestore.instance
+        .collection('orders')
+        .doc(orderId);
+    final snapshot = await orderRef.get();
+    final data = snapshot.data();
+    if (data == null) return;
+
+    List<Map<String, dynamic>> items = List<Map<String, dynamic>>.from(
+      data['items'],
+    );
+    final index = items.indexWhere(
+      (i) =>
+          i['productName'] == product['productName'] &&
+          i['farmerId'] == product['farmerId'],
+    );
+
+    if (index != -1) {
+      items[index]['status'] = 'completed';
+      await orderRef.update({'items': items});
+
+      // Send message logic (here it's a snackbar as a placeholder)
+      final userPhone = await getPhoneNumber(orderId);
+      if (userPhone != null) {
+        final message = Uri.encodeComponent(
+          "Hi there! 🧑‍🌾\n\nYour order for *${product['productName']}* has been *successfully delivered* 📦✅.\n\nWe hope you enjoy the fresh produce! Thank you for supporting local farmers with Farm2Door. 🌿❤️",
+        );
+
+        final whatsappUrl = Uri.parse("https://wa.me/$userPhone?text=$message");
+
+        if (await canLaunchUrl(whatsappUrl)) {
+          await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Could not open WhatsApp")),
+          );
+        }
+      }
+    }
+  }
 
   Future<void> showBuyerLocation(BuildContext context, String userId) async {
     try {
@@ -345,7 +378,8 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                           await handleReject(orderId, product),
                       onGetLocation: () async =>
                           showBuyerLocation(context, product['userId']),
-                      onCompleted: () async => await handleCompleted(orderId, product, context),
+                      onCompleted: () async =>
+                          await handleCompleted(orderId, product, context),
                     ),
                   ),
                 ],

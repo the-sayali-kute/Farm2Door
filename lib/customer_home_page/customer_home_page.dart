@@ -4,6 +4,7 @@ import 'package:forms/customer_home_page/cart/cart_page.dart';
 import 'package:forms/customer_home_page/orders/order_page.dart';
 import 'package:forms/customer_home_page/product_list.dart';
 import 'package:forms/reusables/functions.dart';
+import 'package:forms/widgets/cart_icon_with_badge.dart';
 
 class CustomerHomePage extends StatefulWidget {
   const CustomerHomePage({super.key, required this.snackBarMsg});
@@ -76,13 +77,9 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
               label: "Orders",
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_cart_outlined),
+              icon: CartIconWithBadge(),
               label: "Cart",
             ),
-            // BottomNavigationBarItem(
-            //   icon: Icon(Icons.person),
-            //   label: "My Profile",
-            // ),
           ],
         ),
       ),
