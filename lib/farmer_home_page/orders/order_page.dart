@@ -32,43 +32,103 @@ class _FarmerOrderPageState extends State<FarmerOrderPage> {
     setState(() => _isLoading = true);
 
     final currentFarmerId = FirebaseAuth.instance.currentUser!.uid;
-    final snapshot = await FirebaseFirestore.instance.collection('orders').get();
+
+    // 🔹 Step 1: Get current farmer's deliveryRadius and location
+    final farmerDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(currentFarmerId)
+        .get();
+    if (!farmerDoc.exists) return;
+
+    final farmerData = farmerDoc.data()!;
+    final double deliveryRadius = (farmerData['deliveryRadius'] ?? 50)
+        .toDouble(); // Default to 50km if not set
+    final double farmerLat = farmerData['latitude'];
+    final double farmerLng = farmerData['longitude'];
+
+    // 🔹 Step 2: Fetch all orders
+    final snapshot = await FirebaseFirestore.instance
+        .collection('orders')
+        .get();
     final allOrders = snapshot.docs;
 
-    final relevantOrders = allOrders.where((order) {
-      final items = List<Map<String, dynamic>>.from(order['items']);
-      return items.any((item) => item['farmerId'] == currentFarmerId);
-    }).toList();
+    final List<QueryDocumentSnapshot> relevantOrders = [];
 
+    for (final order in allOrders) {
+      final items = List<Map<String, dynamic>>.from(order['items']);
+
+      // Only check if farmer is part of this order
+      final isFarmerInOrder = items.any(
+        (item) => item['farmerId'] == currentFarmerId,
+      );
+      if (!isFarmerInOrder) continue;
+
+      final userId = order['userId'];
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+      if (!userDoc.exists) continue;
+
+      final customerLat = userDoc['latitude'];
+      final customerLng = userDoc['longitude'];
+
+      final double distance =
+          Geolocator.distanceBetween(
+            farmerLat,
+            farmerLng,
+            customerLat,
+            customerLng,
+          ) /
+          1000; // Convert to kilometers
+
+      if (distance <= deliveryRadius) {
+        relevantOrders.add(order);
+      }
+    }
+
+    // 🔹 Step 3: Sort based on selected criteria
     if (_sortCriteria == 'Time') {
       relevantOrders.sort((a, b) {
         final ta = a['items'][0]['timestamp'] as Timestamp;
         final tb = b['items'][0]['timestamp'] as Timestamp;
-        return _ascending
-            ? ta.compareTo(tb)
-            : tb.compareTo(ta);
+        return _ascending ? ta.compareTo(tb) : tb.compareTo(ta);
       });
+      _sortedOrders = relevantOrders;
     } else if (_sortCriteria == 'Distance') {
-      final Position currentPosition = await Geolocator.getCurrentPosition();
+      final Position currentPosition = Position(
+        latitude: farmerLat,
+        longitude: farmerLng,
+        timestamp: DateTime.now(),
+        accuracy: 1.0,
+        altitude: 0.0,
+        heading: 0.0,
+        speed: 0.0,
+        speedAccuracy: 0.0,
+        altitudeAccuracy: 0.0,
+        headingAccuracy: 0.0,
+        isMocked: false,
+      );
+
       final List<Map<String, dynamic>> orderWithDistance = [];
 
       for (final order in relevantOrders) {
         final userId = order['userId'];
-        final customerDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
-        if (customerDoc.exists) {
-          final lat = customerDoc['latitude'];
-          final lng = customerDoc['longitude'];
-          final distance = Geolocator.distanceBetween(
-            currentPosition.latitude,
-            currentPosition.longitude,
-            lat,
-            lng,
-          );
-          orderWithDistance.add({
-            'order': order,
-            'distance': distance,
-          });
-        }
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .get();
+
+        final lat = userDoc['latitude'];
+        final lng = userDoc['longitude'];
+        final distance = Geolocator.distanceBetween(
+          currentPosition.latitude,
+          currentPosition.longitude,
+          lat,
+          lng,
+        );
+
+        orderWithDistance.add({'order': order, 'distance': distance});
       }
 
       orderWithDistance.sort((a, b) {
@@ -77,12 +137,10 @@ class _FarmerOrderPageState extends State<FarmerOrderPage> {
         return _ascending ? d1.compareTo(d2) : d2.compareTo(d1);
       });
 
-      _sortedOrders = orderWithDistance.map((e) => e['order'] as QueryDocumentSnapshot).toList();
-    } else {
-      _sortedOrders = relevantOrders;
+      _sortedOrders = orderWithDistance
+          .map((e) => e['order'] as QueryDocumentSnapshot)
+          .toList();
     }
-
-    if (_sortCriteria == 'Time') _sortedOrders = relevantOrders;
 
     setState(() => _isLoading = false);
   }
@@ -117,7 +175,13 @@ class _FarmerOrderPageState extends State<FarmerOrderPage> {
           if (_isLoading)
             const Expanded(child: Center(child: CircularProgressIndicator()))
           else if (_sortedOrders.isEmpty)
-            const Expanded(child: NoOrders(msg: "No orders yet!", showOption: false,showAppbar: false,))
+            const Expanded(
+              child: NoOrders(
+                msg: "No orders yet!",
+                showOption: false,
+                showAppbar: false,
+              ),
+            )
           else
             Expanded(
               child: ListView.separated(
@@ -126,9 +190,13 @@ class _FarmerOrderPageState extends State<FarmerOrderPage> {
                 separatorBuilder: (_, __) => const SizedBox(height: 16),
                 itemBuilder: (context, index) {
                   final order = _sortedOrders[index];
-                  final allItems = List<Map<String, dynamic>>.from(order['items']);
+                  final allItems = List<Map<String, dynamic>>.from(
+                    order['items'],
+                  );
                   final farmerId = FirebaseAuth.instance.currentUser!.uid;
-                  final farmerItems = allItems.where((item) => item['farmerId'] == farmerId).toList();
+                  final farmerItems = allItems
+                      .where((item) => item['farmerId'] == farmerId)
+                      .toList();
                   final timestamp = order['items'][0]['timestamp'] as Timestamp;
 
                   return Card(
@@ -155,13 +223,17 @@ class _FarmerOrderPageState extends State<FarmerOrderPage> {
                           const SizedBox(height: 8),
                           Text(
                             'Placed on: ${formatTimestamp(timestamp)}',
-                            style: TextStyle(color: Colors.grey[700], fontSize: 13),
+                            style: TextStyle(
+                              color: Colors.grey[700],
+                              fontSize: 13,
+                            ),
                           ),
                           const SizedBox(height: 10),
                           FutureBuilder<String?>(
                             future: getUserNameFromOrder(order.id),
                             builder: (context, snapshot) {
-                              if (snapshot.connectionState == ConnectionState.waiting) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
                                 return const Text("Loading...");
                               } else if (snapshot.hasError) {
                                 return const Text("Error loading user");
@@ -170,7 +242,10 @@ class _FarmerOrderPageState extends State<FarmerOrderPage> {
                                   children: [
                                     Text(
                                       'Placed by: ',
-                                      style: TextStyle(color: Colors.grey[700], fontSize: 13),
+                                      style: TextStyle(
+                                        color: Colors.grey[700],
+                                        fontSize: 13,
+                                      ),
                                     ),
                                     Text(
                                       snapshot.data ?? "Unknown",
@@ -193,9 +268,14 @@ class _FarmerOrderPageState extends State<FarmerOrderPage> {
                               ),
                               child: TextButton(
                                 onPressed: () {
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (context) => OrderDetailsPage(item: farmerItems, orderId: order.id),
-                                  ));
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => OrderDetailsPage(
+                                        item: farmerItems,
+                                        orderId: order.id,
+                                      ),
+                                    ),
+                                  );
                                 },
                                 style: TextButton.styleFrom(
                                   minimumSize: const Size(150, 50),
@@ -234,8 +314,14 @@ class _FarmerOrderPageState extends State<FarmerOrderPage> {
           DropdownButton<String>(
             value: _sortCriteria,
             items: const [
-              DropdownMenuItem(value: 'Time', child: Text('Sort by Time',style: TextStyle(fontSize: 16),)),
-              DropdownMenuItem(value: 'Distance', child: Text('Sort by Distance',style: TextStyle(fontSize: 16),)),
+              DropdownMenuItem(
+                value: 'Time',
+                child: Text('Sort by Time', style: TextStyle(fontSize: 16)),
+              ),
+              DropdownMenuItem(
+                value: 'Distance',
+                child: Text('Sort by Distance', style: TextStyle(fontSize: 16)),
+              ),
             ],
             onChanged: (value) {
               setState(() => _sortCriteria = value!);

@@ -143,7 +143,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       final userPhone = await getPhoneNumber(orderId);
       if (userPhone != null) {
         final message = Uri.encodeComponent(
-          "Hi there! 🧑‍🌾\n\nYour order for *${product['productName']}* has been *successfully delivered* 📦✅.\n\nWe hope you enjoy the fresh produce! Thank you for supporting local farmers with Farm2Door. 🌿❤️",
+          "Hi there! 🧑‍🌾\n\nYour order for *${product['productName']}* has been *successfully delivered* 📦✅.\n\nWe hope you enjoy the fresh produce! Thank you for supporting local farmers with Farm2Door. 🌿",
         );
 
         final whatsappUrl = Uri.parse("https://wa.me/$userPhone?text=$message");
