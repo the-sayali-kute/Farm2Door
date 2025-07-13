@@ -108,7 +108,7 @@ class ProductDetailsPage extends StatefulWidget {
   final String harvestedDate;
   final String farmerId;
   final String sellingPrice;
-  final String stock;
+  final String presentStock;
   final String mrp;
   final String discountPercent;
   final String unit;
@@ -119,7 +119,7 @@ class ProductDetailsPage extends StatefulWidget {
     required this.productName, //u
     required this.harvestedDate, //u
     required this.farmerId,
-    required this.stock, //u
+    required this.presentStock, //u
     required this.sellingPrice, //u
     required this.discountPercent, //u
     required this.unit, //u
@@ -319,7 +319,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                     ),
                     SizedBox(height: 10),
                     Text(
-                      "${displayStock(int.parse(widget.stock), widget.unit)} left",
+                      "${displayStock(int.parse(widget.presentStock), widget.unit)} left",
                       style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ],

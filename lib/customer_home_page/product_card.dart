@@ -166,7 +166,7 @@ class ProductCard extends StatefulWidget {
   final String harvestedDate;
   final String farmerId;
   final String sellingPrice;
-  final String stock;
+  final String presentStock;
   final String mrp;
   final String discountPercent;
   final String unit;
@@ -178,7 +178,7 @@ class ProductCard extends StatefulWidget {
     required this.productName,
     required this.harvestedDate,
     required this.farmerId,
-    required this.stock,
+    required this.presentStock,
     required this.sellingPrice,
     required this.discountPercent,
     required this.unit,
@@ -209,7 +209,9 @@ class _ProductCardState extends State<ProductCard> {
     final farmerData = farmerDoc.data();
     if (farmerData == null ||
         farmerData['latitude'] == null ||
-        farmerData['longitude'] == null) return;
+        farmerData['longitude'] == null) {
+      return;
+    }
 
     final double lat = farmerData['latitude'];
     final double lng = farmerData['longitude'];
@@ -247,7 +249,7 @@ class _ProductCardState extends State<ProductCard> {
               farmerId: widget.farmerId,
               harvestedDate: widget.harvestedDate,
               discountPercent: widget.discountPercent,
-              stock: widget.stock,
+              presentStock: widget.presentStock,
             ),
           ),
         );

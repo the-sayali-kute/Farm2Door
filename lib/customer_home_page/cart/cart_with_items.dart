@@ -333,10 +333,6 @@ class _CartWithItemsState extends State<CartWithItems> {
                           value: '${_getTotalItems(cartItems)}',
                         ),
                         summaryRow(
-                          label: 'Total Weight',
-                          value: '${_getTotalItems(cartItems)} kg',
-                        ),
-                        summaryRow(
                           label: 'Original Price',
                           value:
                               '₹ ${_getOriginalPrice(cartItems).toStringAsFixed(2)}',

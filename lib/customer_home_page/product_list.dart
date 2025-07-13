@@ -203,7 +203,7 @@ class _ProductListState extends State<ProductList> {
                       sellingPrice: data["sellingPrice"].toString(),
                       mrp: data["mrp"].toString(),
                       discountPercent: data["discountPercent"].toString(),
-                      stock: data["stock"].toString(),
+                      presentStock: data["presentStock"].toString(),
                     );
                   },
                 ),

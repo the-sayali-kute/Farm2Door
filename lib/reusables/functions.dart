@@ -94,6 +94,46 @@ String displayStock(int stock, String unit) {
   }
 }
 
+Future<double> calculateTotalStockPercentage() async {
+  final currentUser = FirebaseAuth.instance.currentUser;
+  if (currentUser == null) return 0.0;
+
+  final farmerId = currentUser.uid;
+
+  final snapshot = await FirebaseFirestore.instance
+      .collection('products')
+      .where('farmerId', isEqualTo: farmerId)
+      .get();
+
+  double totalOriginal = 0;
+  double totalPresent = 0;
+
+  for (var doc in snapshot.docs) {
+    final data = doc.data();
+
+    try {
+      final originalRaw = data['originalStock'];
+      final presentRaw = data['presentStock'];
+
+      final original = originalRaw != null
+          ? double.tryParse(originalRaw.toString()) ?? 0.0
+          : 0.0;
+      final present = presentRaw != null
+          ? double.tryParse(presentRaw.toString()) ?? 0.0
+          : 0.0;
+
+      totalOriginal += original;
+      totalPresent += present;
+    } catch (e) {
+      debugPrint('Error parsing stock for product ${doc.id}: $e');
+    }
+  }
+
+  if (totalOriginal == 0) return 0.0;
+
+  return (totalPresent / totalOriginal) * 100;
+}
+
 Future<void> updateProductQuantityAfterOrder({
   required String farmerId,
   required String productName,
@@ -140,7 +180,7 @@ Future<void> updateProductQuantityAfterOrder({
     }
 
     // ✅ Update Firestore
-    await productDoc.reference.update({'stock': updatedStock});
+    await productDoc.reference.update({'presentStock': updatedStock});
     debugPrint('✅ Product stock updated to $updatedStock');
   } catch (e) {
     debugPrint('Error updating product quantity: $e');

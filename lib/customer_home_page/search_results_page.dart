@@ -105,7 +105,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                         harvestedDate:
                             product["harvestedDate"]?.toString() ?? "",
                         farmerId: product["farmerId"]?.toString() ?? "",
-                        stock: product["stock"]?.toString() ?? "0",
+                        presentStock: product["presentStock"]?.toString() ?? "0",
                         sellingPrice:
                             product["sellingPrice"]?.toString() ?? "0",
                         discountPercent:

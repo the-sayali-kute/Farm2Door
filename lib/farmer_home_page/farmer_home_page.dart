@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:forms/farmer_home_page/add_product_page.dart';
 import 'package:forms/widgets/appbar.dart';
 import 'package:forms/hamburger_menu_items/hamburger_menu.dart';
 import 'package:forms/farmer_home_page/edit_product.dart';
@@ -46,7 +47,7 @@ class _FarmerHomePageState extends State<FarmerHomePage> {
     return Scaffold(
       appBar: appBar(context, logo: true, hamburger: true, add: true),
       drawer: HamburgerMenu(),
-      body:  buildHomePage(),
+      body: buildHomePage(),
     );
   }
 }
@@ -90,7 +91,6 @@ Widget buildHomePage() {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-
             FutureBuilder(
               future: fetchMyProducts(),
               builder: (context, snapshot) {
@@ -98,7 +98,49 @@ Widget buildHomePage() {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Text("No products added yet.");
+                  return Center(
+                    child: Column(
+                      children: [
+                        SizedBox(height: 140),
+                        Text(
+                          "No products found",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(18),
+                            gradient: gradient,
+                          ),
+                          child: TextButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => AddProductPage(),
+                                ),
+                              );
+                            },
+                            style: TextButton.styleFrom(
+                              minimumSize: const Size(150, 50),
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                            ),
+                            child: const Text(
+                              "Add a product",
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
                 }
                 return Column(
                   children: snapshot.data!
@@ -229,21 +271,21 @@ Widget greetingCard() {
                 }
               },
             ),
-            FutureBuilder<String>(
-              future: loadUserData("totalStock"),
+            FutureBuilder<double>(
+              future: calculateTotalStockPercentage(),
               builder: (context, snapshot) {
-                final value = snapshot.data ?? "0";
+                final value = snapshot.data ?? 0;
 
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return dashboardStat(
                     Icons.store,
                     "Loading...",
-                    "Total stock",
+                    "Remaining stock",
                   );
                 } else if (snapshot.hasError) {
-                  return dashboardStat(Icons.store, "Error", "Total stock");
+                  return dashboardStat(Icons.store, "Error", "Remaining stock");
                 } else {
-                  return dashboardStat(Icons.store, value, "Total stock");
+                  return dashboardStat(Icons.store, "${value.toStringAsFixed(2)} %", "Remaining stock");
                 }
               },
             ),
@@ -347,7 +389,7 @@ Widget productCard(DocumentSnapshot productDoc, BuildContext context) {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Stock: ${displayStock(data['stock'], data['unit'])}",
+            "Stock: ${displayStock(data['presentStock'], data['unit'])}",
             style: TextStyle(fontSize: 13),
           ),
           Text(

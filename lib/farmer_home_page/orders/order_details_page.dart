@@ -87,7 +87,7 @@ class OrderDetailsPage extends StatelessWidget {
     }
   }
 
-Future<void> handleCompleted(String orderId, Map<String, dynamic> product, BuildContext context) async {
+  Future<void> handleCompleted(String orderId, Map<String, dynamic> product, BuildContext context) async {
   final orderRef = FirebaseFirestore.instance.collection('orders').doc(orderId);
   final snapshot = await orderRef.get();
   final data = snapshot.data();

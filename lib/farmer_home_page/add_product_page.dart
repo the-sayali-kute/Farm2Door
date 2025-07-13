@@ -497,24 +497,24 @@ class _AddProductPage extends State<AddProductPage> {
                     try {
                       String? imageUrl;
 
-                      if (_selectedImage != null) {
-                        try {
-                          final imageName = DateTime.now()
-                              .millisecondsSinceEpoch
-                              .toString();
-                          final ref = FirebaseStorage.instance.ref().child(
-                            'product_images/$imageName.jpg',
-                          );
-                          final uploadTask = await ref.putFile(_selectedImage!);
-                          imageUrl = await uploadTask.ref.getDownloadURL();
-                          debugPrint("Image uploaded: $imageUrl");
-                        } catch (e) {
-                          debugPrint("Image upload failed: $e");
-                          ScaffoldMessenger.of(
-                            context,
-                          ).showSnackBar(errorBar("Image upload failed"));
-                        }
-                      }
+                      // if (_selectedImage != null) {
+                      //   try {
+                      //     final imageName = DateTime.now()
+                      //         .millisecondsSinceEpoch
+                      //         .toString();
+                      //     final ref = FirebaseStorage.instance.ref().child(
+                      //       'product_images/$imageName.jpg',
+                      //     );
+                      //     final uploadTask = await ref.putFile(_selectedImage!);
+                      //     imageUrl = await uploadTask.ref.getDownloadURL();
+                      //     debugPrint("Image uploaded: $imageUrl");
+                      //   } catch (e) {
+                      //     debugPrint("Image upload failed: $e");
+                      //     ScaffoldMessenger.of(
+                      //       context,
+                      //     ).showSnackBar(errorBar("Image upload failed"));
+                      //   }
+                      // }
 
                       final productData = {
                         'productName': productNameController.text.trim(),
@@ -523,7 +523,8 @@ class _AddProductPage extends State<AddProductPage> {
                         'mrp': double.parse(mrpController.text),
                         'sellingPrice': double.parse(spController.text),
                         'discountPercent': discount,
-                        'stock': int.parse(stockController.text),
+                        'originalStock': int.parse(stockController.text),
+                        'presentStock':int.parse(stockController.text),
                         'isOrganic': isOrganic,
                         'anyPesticides': pesticidesUsed,
                         'img':imageUrlController.text,

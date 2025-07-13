@@ -78,10 +78,6 @@ class _ProductFilterWidgetState extends State<ProductFilterWidget> {
                     child: Text('Distance', style: TextStyle(fontSize: 16)),
                   ),
                   DropdownMenuItem(
-                    value: ProductFilterType.rating,
-                    child: Text('Rating', style: TextStyle(fontSize: 16)),
-                  ),
-                  DropdownMenuItem(
                     value: ProductFilterType.discount,
                     child: Text('Discount', style: TextStyle(fontSize: 16)),
                   ),

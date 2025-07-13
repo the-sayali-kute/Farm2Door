@@ -42,7 +42,7 @@ dev_dependencies:
 flutter_icons:  # <-- This is at the root level
   android: true
   ios: true
-  image_path: "assets/images/app_icon.png" # Update with your actual icon path
+  image_path: "assets/images/image.png" # Update with your actual icon path
 
 flutter_native_splash:
   color: "#ffffff"
