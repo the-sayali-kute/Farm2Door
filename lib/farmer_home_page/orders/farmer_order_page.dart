@@ -117,7 +117,7 @@ class _FarmerOrderPageState extends State<FarmerOrderPage> {
           if (_isLoading)
             const Expanded(child: Center(child: CircularProgressIndicator()))
           else if (_sortedOrders.isEmpty)
-            const Expanded(child: NoOrders(msg: "No orders yet!", showOption: false))
+            const Expanded(child: NoOrders(msg: "No orders yet!", showOption: false,showAppbar: false,))
           else
             Expanded(
               child: ListView.separated(

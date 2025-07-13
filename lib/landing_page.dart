@@ -63,7 +63,7 @@ class LandingPage extends StatelessWidget {
                     shadowColor: Colors.transparent,
                   ),
                   child: Text(
-                    "Continue with Email or Phone Number",
+                    "Continue with Email",
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,

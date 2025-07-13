@@ -12,7 +12,7 @@ import 'package:forms/widgets/email_widget.dart';
 import 'package:forms/widgets/password_widget.dart';
 import 'package:forms/widgets/address_widget.dart';
 import 'package:forms/widgets/phone_widget.dart';
-import 'package:forms/areaproximity.dart';
+import 'package:forms/farmer_home_page/areaproximity.dart';
 
 class SignupForm extends StatefulWidget {
   const SignupForm({super.key});
@@ -22,7 +22,8 @@ class SignupForm extends StatefulWidget {
 }
 
 class _SignupFormState extends State<SignupForm> {
-  double deliveryRadius = 1; 
+  double deliveryRadius = 1;
+  String selectedRole = "";
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +81,15 @@ class _SignupFormState extends State<SignupForm> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        RoleWidget(),
+                        RoleWidget(
+                          selectedRole: selectedRole,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedRole = value;
+                            });
+                          },
+                        ),
+
                         SizedBox(height: 25),
                         FullNameWidget(),
                         SizedBox(height: 25),
@@ -93,7 +102,6 @@ class _SignupFormState extends State<SignupForm> {
                         AddressWidget(),
                         SizedBox(height: 25),
                         if (selectedRole == "Farmer") ...[
-                          SizedBox(height: 25),
                           AreaProximityWidget(
                             radius: deliveryRadius,
                             onChanged: (value) {
@@ -111,26 +119,33 @@ class _SignupFormState extends State<SignupForm> {
                                 return;
                               }
                               try {
-                               await createUserWithEmailAndPassword(
+                                await createUserWithEmailAndPassword(
                                   email: emailController.text,
                                   password: passwordController.text,
                                   name: fullNameController.text,
                                   phone: phoneController.text,
                                   address: addressController.text,
-                                  role: selectedRole,
+                                  role: selectedRole.toLowerCase(),
                                   context: context,
-                                  deliveryRadius: selectedRole == "Farmer" ? deliveryRadius.toInt() : null,
+                                  deliveryRadius: selectedRole == "Farmer"
+                                      ? deliveryRadius.toInt()
+                                      : null,
                                 );
 
                                 if (selectedRole == "Farmer") {
                                   await FirebaseMessaging.instance
-                                          .getToken()
-                                          .then((token) {
-                                            FirebaseFirestore.instance
-                                                .collection('fcmTokens')
-                                                .doc(FirebaseAuth.instance.currentUser!.uid)
-                                                .set({'token': token});
-                                          });
+                                      .getToken()
+                                      .then((token) {
+                                        FirebaseFirestore.instance
+                                            .collection('fcmTokens')
+                                            .doc(
+                                              FirebaseAuth
+                                                  .instance
+                                                  .currentUser!
+                                                  .uid,
+                                            )
+                                            .set({'token': token});
+                                      });
 
                                   Navigator.pushReplacement(
                                     // ignore: use_build_context_synchronously
@@ -144,8 +159,7 @@ class _SignupFormState extends State<SignupForm> {
                                     // ignore: use_build_context_synchronously
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) =>
-                                          LoginForm(),
+                                      builder: (context) => LoginForm(),
                                     ),
                                   );
                                 }

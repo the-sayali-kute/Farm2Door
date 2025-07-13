@@ -39,7 +39,7 @@ final userMap = {
   "createdAt": FieldValue.serverTimestamp(),
 };
 
-if (role == "farmer") {
+if (role.toLowerCase() == "farmer") {
   userMap["revenue"] = 0;
   userMap["orders"] = 0;
   if (deliveryRadius != null) {

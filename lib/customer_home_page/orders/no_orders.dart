@@ -6,12 +6,15 @@ import 'package:lottie/lottie.dart';
 class NoOrders extends StatelessWidget {
   final String msg;
   final bool showOption;
-  const NoOrders({super.key,required this.msg,required this.showOption});
+  final bool showAppbar;
+  const NoOrders({super.key,required this.msg,required this.showOption,this.showAppbar = true});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: appBar(context,title: "My Orders"),
+
+      appBar:showAppbar ? 
+       appBar(context,title: "My Orders"):null,
       body: Column(
         children: [
           const SizedBox(height: 100),
