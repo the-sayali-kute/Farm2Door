@@ -61,7 +61,7 @@ class _HamburgerMenuState extends State<HamburgerMenu> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '${userData?["name"]}' ?? "Loading...",
+                            '${userData?["name"]}',
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,

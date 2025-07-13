@@ -164,9 +164,9 @@ class _CartWithItemsState extends State<CartWithItems> {
                         final cartItem = cartItems[index];
                         final String productName =
                             cartItem['productName'] ?? '';
-                        final int price =
-                            int.tryParse(cartItem['sellingPrice'].toString()) ??
-                            0;
+                        // final int price =
+                        //     int.tryParse(cartItem['sellingPrice'].toString()) ??
+                        //     0;
                         final String path = cartItem['img'] ?? '';
                         final int quantity =
                             int.tryParse(cartItem['quantity'].toString()) ?? 1;
