@@ -20,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkLoginAndRedirect() async {
-    await Future.delayed(const Duration(seconds: 2)); // Show logo for 2 seconds
+    await Future.delayed(const Duration(seconds: 3)); // Show logo for 2 seconds
 
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -78,7 +78,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   image: const DecorationImage(
-                    image: AssetImage('assets/images/logo.jpg'),
+                    image: AssetImage('assets/images/image.png'),
                     fit: BoxFit.cover,
                   ),
                   boxShadow: [
