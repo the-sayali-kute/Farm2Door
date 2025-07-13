@@ -160,7 +160,7 @@ Future<void> updateProductQuantityAfterOrder({
     debugPrint('Fetched product: $data');
 
     // Get current stock safely
-    final stockRaw = data['stock'];
+    final stockRaw = data['originalStock'];
     int updatedStock;
 
     if (stockRaw is int) {

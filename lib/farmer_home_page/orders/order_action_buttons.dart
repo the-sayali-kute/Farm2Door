@@ -46,6 +46,47 @@ class _OrderActionButtonsState extends State<OrderActionButtons> {
 
   @override
   Widget build(BuildContext context) {
+    if (_status == "accepted") {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          ElevatedButton.icon(
+            onPressed: widget.onGetLocation,
+            icon: const Icon(Icons.location_on),
+            label: const Text("Get Location"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              textStyle: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+          ElevatedButton.icon(
+            onPressed: _handleCompleted,
+            icon: Icon(Icons.done_all),
+            label: Text("Completed"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              textStyle: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
     if (_status == "pending") {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -91,47 +132,9 @@ class _OrderActionButtonsState extends State<OrderActionButtons> {
           ),
         ],
       );
-    } else if (_status == "accepted") {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          ElevatedButton.icon(
-            onPressed: widget.onGetLocation,
-            icon: const Icon(Icons.location_on),
-            label: const Text("Get Location"),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              textStyle: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-          ),
-          ElevatedButton.icon(
-            onPressed: _handleCompleted,
-            icon: Icon(Icons.done_all),
-            label: Text("Completed"),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              textStyle: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-          ),
-        ],
-      );
-    } else if (_status == "rejected") {
+    }
+    
+    if (_status == "rejected") {
       return Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
@@ -154,7 +157,8 @@ class _OrderActionButtonsState extends State<OrderActionButtons> {
           ],
         ),
       );
-    } else if (_status == "completed") {
+    }
+    if (_status == "completed") {
       return Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
