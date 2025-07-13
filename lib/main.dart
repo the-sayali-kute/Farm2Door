@@ -1,16 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';import 'firebase_options.dart';
-import 'landing_page.dart';
+import 'package:forms/splash_screen.dart';
+import 'firebase_options.dart';
 
 void main() async {
-  final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
-  FlutterNativeSplash.preserve(widgetsBinding: binding);
+  WidgetsFlutterBinding.ensureInitialized();
   debugPrintGestureArenaDiagnostics = false;
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await Future.delayed(Duration(seconds: 7));
-  FlutterNativeSplash.remove();
   runApp(const MyApp());
 }
 
@@ -41,7 +38,7 @@ class _MyAppState extends State<MyApp> {
           primary: Color.fromRGBO(142, 231, 179, 1),
         ),
       ),
-      home: LandingPage(),
+      home: SplashScreen(),
     );
   }
 }
