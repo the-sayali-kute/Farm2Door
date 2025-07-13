@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forms/authentication/db_functions.dart';
-import 'package:forms/customer_home_page/appbar.dart';
+import 'package:forms/widgets/appbar.dart';
 import 'package:forms/customer_home_page/product_card.dart';
 import 'product_filters.dart'; // your existing filter widget file
 

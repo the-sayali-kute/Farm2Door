@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:forms/customer_home_page/customer_home_page.dart';
 import 'package:forms/farmer_home_page/farmer_main_page.dart';
-import 'package:forms/landing_page.dart';
+import 'package:forms/app_startup/landing_page.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

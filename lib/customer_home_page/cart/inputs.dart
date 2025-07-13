@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:forms/functions.dart';
+import 'package:forms/reusables/functions.dart';
 
 final border = OutlineInputBorder(
   borderSide: BorderSide(color: Colors.black),

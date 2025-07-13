@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:forms/final_vars.dart';
-import 'package:forms/functions.dart';
+import 'package:forms/reusables/final_vars.dart';
+import 'package:forms/reusables/functions.dart';
 import 'package:lottie/lottie.dart';
 
 class LogOut extends StatelessWidget {

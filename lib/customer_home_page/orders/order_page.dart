@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:forms/functions.dart';
+import 'package:forms/reusables/functions.dart';
 import 'package:intl/intl.dart';
-import 'package:forms/customer_home_page/appbar.dart';
+import 'package:forms/widgets/appbar.dart';
 import 'package:forms/customer_home_page/orders/no_orders.dart';
 
 class OrderPage extends StatelessWidget {

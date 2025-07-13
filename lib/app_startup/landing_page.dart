@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:forms/final_vars.dart';
+import 'package:forms/reusables/final_vars.dart';
 import 'package:forms/authentication/login_form.dart';
 import 'package:forms/authentication/signup_form.dart';
 

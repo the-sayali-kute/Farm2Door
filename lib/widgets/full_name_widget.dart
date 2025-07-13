@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:forms/final_vars.dart';
+import 'package:forms/reusables/final_vars.dart';
 class FullNameWidget extends StatelessWidget {
   const FullNameWidget({super.key});
 

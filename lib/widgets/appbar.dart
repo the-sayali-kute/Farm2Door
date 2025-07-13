@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:forms/customer_home_page/search_page.dart';
 import 'package:forms/customer_home_page/wishlist/wishlist_page.dart';
 import 'package:forms/farmer_home_page/add_product_page.dart';
-import 'package:forms/final_vars.dart';
+import 'package:forms/reusables/final_vars.dart';
 
 AppBar appBar(
   BuildContext context, {

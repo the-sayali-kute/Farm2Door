@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:forms/authentication/login_form.dart';
-import 'package:forms/functions.dart';
+import 'package:forms/reusables/functions.dart';
 import 'package:geolocator/geolocator.dart';
 
 // import 'package:firebase_core/firebase_core.dart';

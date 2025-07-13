@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:forms/final_vars.dart';
+import 'package:forms/reusables/final_vars.dart';
 import 'package:lottie/lottie.dart';
 
 class InviteFriends extends StatelessWidget {

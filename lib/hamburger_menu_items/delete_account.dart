@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:forms/final_vars.dart';
-import 'package:forms/functions.dart';
-import 'package:forms/landing_page.dart';
+import 'package:forms/reusables/final_vars.dart';
+import 'package:forms/reusables/functions.dart';
+import 'package:forms/app_startup/landing_page.dart';
 import 'package:lottie/lottie.dart';
 
 class DeleteAccount extends StatelessWidget {

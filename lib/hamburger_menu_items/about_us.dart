@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:forms/customer_home_page/hamburger_menu_items/instagram_gradient_icon.dart';
-import 'package:forms/final_vars.dart';
+import 'package:forms/hamburger_menu_items/instagram_gradient_icon.dart';
+import 'package:forms/reusables/final_vars.dart';
 import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';

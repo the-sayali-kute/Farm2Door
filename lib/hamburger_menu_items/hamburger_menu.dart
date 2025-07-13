@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:forms/customer_home_page/hamburger_menu_items/edit_profile.dart';
-import 'package:forms/final_vars.dart';
+import 'package:forms/hamburger_menu_items/edit_profile.dart';
+import 'package:forms/reusables/final_vars.dart';
 
 class HamburgerMenu extends StatefulWidget {
   const HamburgerMenu({super.key});

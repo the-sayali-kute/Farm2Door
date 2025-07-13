@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:forms/customer_home_page/orders/order_success_page.dart';
 import 'package:forms/customer_home_page/orders/pick_location_map.dart';
-import 'package:forms/functions.dart';
+import 'package:forms/reusables/functions.dart';
 import 'package:geolocator/geolocator.dart';
 
 class DeliveryAddressModal extends StatefulWidget {

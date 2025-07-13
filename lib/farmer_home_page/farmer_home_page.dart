@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:forms/customer_home_page/appbar.dart';
-import 'package:forms/customer_home_page/hamburger_menu.dart';
+import 'package:forms/widgets/appbar.dart';
+import 'package:forms/hamburger_menu_items/hamburger_menu.dart';
 import 'package:forms/farmer_home_page/edit_product.dart';
-import 'package:forms/final_vars.dart';
-import 'package:forms/functions.dart';
+import 'package:forms/reusables/final_vars.dart';
+import 'package:forms/reusables/functions.dart';
 
 class FarmerHomePage extends StatefulWidget {
   const FarmerHomePage({super.key});

@@ -47,7 +47,7 @@
 //   }
 // }
 import 'package:flutter/material.dart';
-import 'package:forms/final_vars.dart';
+import 'package:forms/reusables/final_vars.dart';
 
 class RoleWidget extends StatelessWidget {
   final String selectedRole;

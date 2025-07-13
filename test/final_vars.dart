@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:forms/customer_home_page/hamburger_menu_items/FAQs.dart';
-import 'package:forms/customer_home_page/hamburger_menu_items/about_us.dart';
-import 'package:forms/customer_home_page/hamburger_menu_items/invite_friends.dart';
-import 'package:forms/customer_home_page/hamburger_menu_items/privacy_policy.dart';
-import 'package:forms/customer_home_page/hamburger_menu_items/terms_and_conditions.dart';
+import 'package:forms/hamburger_menu_items/FAQs.dart';
+import 'package:forms/hamburger_menu_items/about_us.dart';
+import 'package:forms/hamburger_menu_items/invite_friends.dart';
+import 'package:forms/hamburger_menu_items/privacy_policy.dart';
+import 'package:forms/hamburger_menu_items/terms_and_conditions.dart';
 
 final gradient = LinearGradient(
   colors: [
