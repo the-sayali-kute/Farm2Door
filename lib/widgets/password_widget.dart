@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forms/reusables/final_vars.dart';
+
 class passwordWidget extends StatelessWidget {
   const passwordWidget({super.key});
 
@@ -18,12 +19,27 @@ class passwordWidget extends StatelessWidget {
         enabledBorder: border,
       ),
       validator: (value) {
-          if (value == null || value.trim().isEmpty) {
-            return 'Password is required';
-          }
-          return null;
-        },
+        final password = value?.trim() ?? '';
 
+        // Rule 1: Minimum length
+        if (password.length < 6) {
+          return 'Password must be at least 6 characters long';
+        }
+
+        // Rule 2: At least one special character
+        final specialCharRegex = RegExp(r'[!@#$%^&*(),.?":{}|<>]');
+        if (!specialCharRegex.hasMatch(password)) {
+          return 'Include at least one special character';
+        }
+
+        // Rule 3: At least one uppercase letter
+        final uppercaseRegex = RegExp(r'[A-Z]');
+        if (!uppercaseRegex.hasMatch(password)) {
+          return 'Include at least one uppercase letter';
+        }
+
+        return null; // ✅ Password is valid
+      },
     );
   }
 }
