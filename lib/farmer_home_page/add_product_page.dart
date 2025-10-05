@@ -333,9 +333,20 @@ class _AddProductPage extends State<AddProductPage> {
                   if (value == null || value.trim().isEmpty) {
                     return 'Stock is required';
                   }
-                  return null;
+
+                  final int? stock = int.tryParse(value.trim());
+                  if (stock == null) {
+                    return 'Stock must be a valid number';
+                  }
+
+                  if (stock <= 0) {
+                    return 'Stock must be greater than 0';
+                  }
+
+                  return null; // ✅ Valid input
                 },
               ),
+
               SizedBox(height: 25),
 
               Row(
