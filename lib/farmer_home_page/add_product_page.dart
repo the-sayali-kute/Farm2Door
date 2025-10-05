@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:forms/widgets/appbar.dart';
 import 'package:forms/farmer_home_page/farmer_main_page.dart';
@@ -435,19 +434,19 @@ class _AddProductPage extends State<AddProductPage> {
               SizedBox(height: 15),
               SwitchListTile(
                 title: Text("Harvested today?"),
-                activeColor: Color(0xFF4CA330),
+                activeThumbColor: Color(0xFF4CA330),
                 value: harvestedToday,
                 onChanged: (val) => setState(() => harvestedToday = val),
               ),
               SwitchListTile(
                 title: Text("Any pesticides used?"),
-                activeColor: Color(0xFF4CA330),
+                activeThumbColor: Color(0xFF4CA330),
                 value: pesticidesUsed,
                 onChanged: (val) => setState(() => pesticidesUsed = val),
               ),
               SwitchListTile(
                 title: Text("Organically grown?"),
-                activeColor: Color(0xFF4CA330),
+                activeThumbColor: Color(0xFF4CA330),
                 value: isOrganic,
                 onChanged: (val) => setState(() => isOrganic = val),
               ),

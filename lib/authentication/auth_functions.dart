@@ -13,7 +13,7 @@ Future<void> createUserWithEmailAndPassword({
   required String name,
   required String phone,
   required String role,
-  required String address,
+  // required String address,
   required BuildContext context,
   int? deliveryRadius,
 }) async {
@@ -31,7 +31,7 @@ final userMap = {
   "name": name,
   "email": email,
   "phone": phone,
-  "address": address,
+  // "address": address,
   "role": role,
   "password": password,
   "latitude": position?.latitude,

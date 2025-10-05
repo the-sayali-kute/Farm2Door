@@ -106,7 +106,7 @@ class _RoleWidgetState extends State<RoleWidget> {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
-      value: selectedRole,
+      initialValue: selectedRole,
       style: TextStyle(fontSize: 16, color: Colors.black),
       decoration: InputDecoration(
         labelText: "Role",

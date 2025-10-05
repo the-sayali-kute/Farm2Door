@@ -62,7 +62,7 @@ class RoleWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
-      value: selectedRole.isNotEmpty ? selectedRole : null,
+      initialValue: selectedRole.isNotEmpty ? selectedRole : null,
       style: const TextStyle(fontSize: 16, color: Colors.black),
       decoration: InputDecoration(
         labelText: "Role",

@@ -99,8 +99,8 @@ class _SignupFormState extends State<SignupForm> {
                         SizedBox(height: 25),
                         passwordWidget(),
                         SizedBox(height: 25),
-                        AddressWidget(),
-                        SizedBox(height: 25),
+                        // AddressWidget(),
+                        // SizedBox(height: 25),
                         if (selectedRole == "Farmer") ...[
                           AreaProximityWidget(
                             radius: deliveryRadius,
@@ -124,7 +124,7 @@ class _SignupFormState extends State<SignupForm> {
                                   password: passwordController.text,
                                   name: fullNameController.text,
                                   phone: phoneController.text,
-                                  address: addressController.text,
+                                  // address: addressController.text,
                                   role: selectedRole.toLowerCase(),
                                   context: context,
                                   deliveryRadius: selectedRole == "Farmer"
