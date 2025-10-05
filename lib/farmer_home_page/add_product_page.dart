@@ -207,17 +207,26 @@ class _AddProductPage extends State<AddProductPage> {
                 cursorColor: Colors.black,
                 controller: imageUrlController,
                 decoration: InputDecoration(
-                  labelText: "Image url",
+                  labelText: "Image URL",
                   labelStyle: Theme.of(context).textTheme.bodyMedium,
                   focusedBorder: border,
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Image url is required';
+                    return 'Image URL is required'; // Case: empty input
                   }
-                  return null;
+
+                  final Uri? uri = Uri.tryParse(value.trim());
+
+                  if (uri == null ||
+                      !(uri.isScheme('http') || uri.isScheme('https'))) {
+                    return 'Enter valid image URL'; // Case: invalid format (TCA-009)
+                  }
+
+                  return null; // Valid format → Accepted (TCA-008)
                 },
               ),
+
               SizedBox(height: 25),
 
               // PRODUCT DESCRIPTION
