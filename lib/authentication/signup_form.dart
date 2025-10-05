@@ -97,7 +97,7 @@ class _SignupFormState extends State<SignupForm> {
                         SizedBox(height: 25),
                         PhoneWidget(),
                         SizedBox(height: 25),
-                        passwordWidget(),
+                        PasswordWidget(),
                         SizedBox(height: 25),
                         // AddressWidget(),
                         // SizedBox(height: 25),
@@ -119,7 +119,8 @@ class _SignupFormState extends State<SignupForm> {
                                 return;
                               }
                               try {
-                                await createUserWithEmailAndPassword(
+                                bool isValid = true;
+                                isValid = await createUserWithEmailAndPassword(
                                   email: emailController.text,
                                   password: passwordController.text,
                                   name: fullNameController.text,
@@ -131,38 +132,16 @@ class _SignupFormState extends State<SignupForm> {
                                       ? deliveryRadius.toInt()
                                       : null,
                                 );
-
-                                if (selectedRole == "Farmer") {
-                                  await FirebaseMessaging.instance
-                                      .getToken()
-                                      .then((token) {
-                                        FirebaseFirestore.instance
-                                            .collection('fcmTokens')
-                                            .doc(
-                                              FirebaseAuth
-                                                  .instance
-                                                  .currentUser!
-                                                  .uid,
-                                            )
-                                            .set({'token': token});
-                                      });
-
+                                if(!isValid){
                                   Navigator.pushReplacement(
                                     // ignore: use_build_context_synchronously
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => LoginForm(),
-                                    ),
-                                  );
-                                } else if (selectedRole == "Buyer") {
-                                  Navigator.pushReplacement(
-                                    // ignore: use_build_context_synchronously
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => LoginForm(),
+                                      builder: (context) => SignupForm(),
                                     ),
                                   );
                                 }
+                                
                               } catch (e) {
                                 ScaffoldMessenger.of(
                                   // ignore: use_build_context_synchronously

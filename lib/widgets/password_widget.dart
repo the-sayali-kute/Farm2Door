@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:forms/reusables/final_vars.dart';
 
-class passwordWidget extends StatelessWidget {
-  const passwordWidget({super.key});
+class PasswordWidget extends StatefulWidget {
+  const PasswordWidget({super.key});
+
+  @override
+  State<PasswordWidget> createState() => _PasswordWidgetState();
+}
+
+class _PasswordWidgetState extends State<PasswordWidget> {
+  bool _obscureText = true;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      obscureText: true,
+      obscureText: _obscureText,
       controller: passwordController,
       cursorColor: Colors.black,
       keyboardType: TextInputType.visiblePassword,
@@ -17,6 +24,17 @@ class passwordWidget extends StatelessWidget {
         border: border,
         focusedBorder: border,
         enabledBorder: border,
+        suffixIcon: IconButton(
+          icon: Icon(
+            _obscureText ? Icons.visibility_off : Icons.visibility,
+            color: Colors.grey,
+          ),
+          onPressed: () {
+            setState(() {
+              _obscureText = !_obscureText;
+            });
+          },
+        ),
       ),
       validator: (value) {
         final password = value?.trim() ?? '';
