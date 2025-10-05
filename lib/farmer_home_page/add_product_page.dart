@@ -94,7 +94,7 @@ class _AddProductPage extends State<AddProductPage> {
             leading: Icon(Icons.photo_library),
             title: Text('Choose from gallery'),
             onTap: () {
-             Navigator.maybePop(context);
+              Navigator.maybePop(context);
 
               _pickImageFromGallery();
             },
@@ -181,10 +181,25 @@ class _AddProductPage extends State<AddProductPage> {
                   focusedBorder: border,
                 ),
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Product Name is required';
+                  final name = value?.trim() ?? '';
+
+                  // Rule 1: Empty check
+                  if (name.isEmpty) {
+                    return "Product name cannot be empty";
                   }
-                  return null;
+
+                  // Rule 2: Special characters not allowed
+                  final validNameRegex = RegExp(r'^[a-zA-Z0-9 ]+$');
+                  if (!validNameRegex.hasMatch(name)) {
+                    return "Invalid characters not allowed";
+                  }
+
+                  // Rule 3: Length restriction
+                  if (name.length > 50) {
+                    return "Product name too long (max 50 chars)";
+                  }
+
+                  return null; // ✅ Valid name
                 },
               ),
               SizedBox(height: 25),
@@ -523,10 +538,10 @@ class _AddProductPage extends State<AddProductPage> {
                         'sellingPrice': double.parse(spController.text),
                         'discountPercent': discount,
                         'originalStock': int.parse(stockController.text),
-                        'presentStock':int.parse(stockController.text),
+                        'presentStock': int.parse(stockController.text),
                         'isOrganic': isOrganic,
                         'anyPesticides': pesticidesUsed,
-                        'img':imageUrlController.text,
+                        'img': imageUrlController.text,
                         'harvestedDate': harvestedDate!.toIso8601String(),
                         'createdAt': Timestamp.now(),
                         'farmerId': FirebaseAuth.instance.currentUser!.uid,
