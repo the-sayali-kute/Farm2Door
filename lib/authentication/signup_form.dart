@@ -1,6 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:forms/authentication/auth_functions.dart';
 import 'package:forms/authentication/login_form.dart';
@@ -10,7 +7,6 @@ import 'package:forms/reusables/final_vars.dart';
 import 'package:forms/widgets/full_name_widget.dart';
 import 'package:forms/widgets/email_widget.dart';
 import 'package:forms/widgets/password_widget.dart';
-import 'package:forms/widgets/address_widget.dart';
 import 'package:forms/widgets/phone_widget.dart';
 import 'package:forms/farmer_home_page/areaproximity.dart';
 

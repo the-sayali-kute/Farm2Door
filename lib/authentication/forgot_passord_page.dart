@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:forms/reusables/functions.dart';
 import 'package:forms/widgets/appbar.dart';
 import 'package:forms/reusables/final_vars.dart';
-import 'package:forms/reusables/functions.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -14,15 +15,18 @@ class ForgotPasswordPage extends StatefulWidget {
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final TextEditingController emailController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   bool isLoading = false;
 
+  // ✅ Check if email exists in Firestore before sending reset link
   void resetPassword() async {
     final email = emailController.text.trim();
 
-    // ✅ Email validation
+    // Email validation
     if (email.isEmpty || !email.contains('@')) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("❗ Please enter a valid email address.")),
+        errorBar("Please enter a valid email address."),
       );
       return;
     }
@@ -30,21 +34,42 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     setState(() => isLoading = true);
 
     try {
-      await _auth.sendPasswordResetEmail(email: email);
-      setState(() => isLoading = false);
+      // Query Firestore users collection to check if email exists
+      final querySnapshot = await _firestore
+          .collection('users') // your Firestore collection for users
+          .where('email', isEqualTo: email)
+          .get();
 
+      if (querySnapshot.docs.isEmpty) {
+        // Email not found in Firestore
+        setState(() => isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          errorBar("No account found with this email."),
+        );
+        return;
+      }
+
+      // Email exists in Firestore → send password reset
+      await _auth.sendPasswordResetEmail(email: email);
+
+      setState(() => isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("📧 Reset link sent to your email")),
+        successBar("Reset link sent to your email.")
       );
 
-      Navigator.maybePop(context);
-      // Back to login screen
+      Navigator.maybePop(context); // Back to login
+    } on FirebaseAuthException catch (e) {
+      setState(() => isLoading = false);
+      String errorMessage = "Something went wrong.";
+      if (e.code == 'user-not-found') {
+        errorMessage = "No user found for that email.";
+      }
+      ScaffoldMessenger.of(context).showSnackBar(errorBar(errorMessage));
     } catch (e) {
       setState(() => isLoading = false);
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("❌ ${e.toString()}")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        errorBar("An error occurred. Please try again.")
+      );
     }
   }
 
@@ -59,9 +84,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           children: [
             Text("Enter your email to receive a password reset link"),
             SizedBox(height: 20),
-            TextField(
-              cursorColor: Colors.black,
+            TextFormField(
               controller: emailController,
+              cursorColor: Colors.black,
+              keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
                 labelText: "Email Address",
                 labelStyle: Theme.of(context).textTheme.bodyMedium,
@@ -69,11 +95,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 focusedBorder: border,
                 enabledBorder: border,
               ),
-              keyboardType: TextInputType.emailAddress,
             ),
             SizedBox(height: 20),
-
-            // ✅ Button or loading indicator
             isLoading
                 ? CircularProgressIndicator()
                 : Center(
@@ -83,12 +106,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         gradient: gradient,
                       ),
                       child: TextButton(
-                        onPressed: () async {
-                          _sendPasswordResetEmail(
-                            context,
-                            emailController.text,
-                          );
-                        },
+                        onPressed: resetPassword,
                         style: TextButton.styleFrom(
                           minimumSize: Size(150, 50),
                           backgroundColor: Colors.transparent,
@@ -108,36 +126,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           ],
         ),
       ),
-    );
-  }
-}
-
-void _sendPasswordResetEmail(BuildContext context, String email) async {
-  if (email.trim().isEmpty || !email.contains('@')) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      errorBar("Please enter a valid email address.")
-    );
-    return;
-  }
-
-  try {
-    await FirebaseAuth.instance.sendPasswordResetEmail(email: email.trim());
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      successBar("Reset link sent! Please check your email.")
-    );
-  } on FirebaseAuthException catch (e) {
-    String errorMessage = "Something went wrong.";
-    if (e.code == 'user-not-found') {
-      errorMessage = "No user found for that email.";
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      errorBar(errorMessage)
-    );
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      errorBar("An error occurred. Please try again.")
     );
   }
 }

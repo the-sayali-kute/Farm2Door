@@ -48,10 +48,10 @@ class _AddProductPage extends State<AddProductPage> {
   double discount = 0;
 
   void updateDiscount() {
-    final mrp = double.tryParse(mrpController.text) ?? 0;
-    final sp = double.tryParse(spController.text) ?? 0;
+    final mrp = double.tryParse(mrpController.text);
+    final sp = double.tryParse(spController.text);
 
-    if (mrp > 0 && sp > 0) {
+    if (mrp! > 0 && sp! > 0) {
       if (sp <= mrp) {
         setState(() {
           discount = ((mrp - sp) / mrp * 100);
@@ -62,18 +62,19 @@ class _AddProductPage extends State<AddProductPage> {
         });
 
         // Show a warning SnackBar or toast
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Selling Price cannot be more than MRP."),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(errorBar("Selling price can't be more than MRP"));
       }
     } else {
       setState(() {
         discount = 0;
       });
     }
+  }
+
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
   void _showImageSourceSelector(BuildContext context) {
@@ -426,7 +427,7 @@ class _AddProductPage extends State<AddProductPage> {
                     context: context,
                     initialDate: DateTime.now(),
                     firstDate: DateTime(2024),
-                    lastDate: DateTime.now(),
+                    lastDate: DateTime.now(), // Prevents selecting future dates
                     builder: (context, child) {
                       return Theme(
                         data: Theme.of(context).copyWith(
@@ -445,18 +446,19 @@ class _AddProductPage extends State<AddProductPage> {
                         ),
                         child: child!,
                       );
-                    }, // Prevents selecting future dates
+                    },
                   );
-                  setState(() {
-                    harvestedDate = pickedDate;
-                    if (pickedDate != null) {
-                      setState(() {
-                        harvestedDate = pickedDate;
-                        harvestedDateController.text =
-                            "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
-                      });
-                    }
-                  });
+
+                  if (pickedDate != null) {
+                    setState(() {
+                      harvestedDate = pickedDate;
+                      harvestedDateController.text =
+                          "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+
+                      // ✅ Auto-toggle harvestedToday
+                      harvestedToday = _isSameDay(pickedDate, DateTime.now());
+                    });
+                  }
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -466,12 +468,25 @@ class _AddProductPage extends State<AddProductPage> {
                 },
               ),
 
+              // helper method
               SizedBox(height: 15),
               SwitchListTile(
                 title: Text("Harvested today?"),
-                activeThumbColor: Color(0xFF4CA330),
                 value: harvestedToday,
-                onChanged: (val) => setState(() => harvestedToday = val),
+                activeThumbColor: Color(0xFF4CA330),
+                onChanged: (bool value) {
+                  setState(() {
+                    harvestedToday = value;
+                    if (value) {
+                      harvestedDate = DateTime.now();
+                      harvestedDateController.text =
+                          "${harvestedDate!.day}/${harvestedDate!.month}/${harvestedDate!.year}";
+                    } else {
+                      harvestedDate = null;
+                      harvestedDateController.clear();
+                    }
+                  });
+                },
               ),
               SwitchListTile(
                 title: Text("Any pesticides used?"),
@@ -529,7 +544,13 @@ class _AddProductPage extends State<AddProductPage> {
 
                     // Store product details
                     try {
-                      String? imageUrl;
+                      final mrp = double.tryParse(mrpController.text);
+                      final sp = double.tryParse(spController.text);
+                      if (mrp == null || sp == null) {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(errorBar("Enter valid price"));
+                      }
 
                       // if (_selectedImage != null) {
                       //   try {
