@@ -41,7 +41,7 @@ class DeleteAccount extends StatelessWidget {
       // Delete auth account
       await user.delete();
 
-      // Wait briefly for UI to show snackbar (optional)
+      // Wait briefly for UI to show snackbar 
       await Future.delayed(const Duration(milliseconds: 500));
 
       if (context.mounted) {
@@ -177,7 +177,6 @@ class DeleteAccount extends StatelessWidget {
 
 Future<String?> _promptForPassword(BuildContext context) async {
   final TextEditingController passwordController = TextEditingController();
-
   return await showDialog<String>(
     context: context,
     builder: (context) => AlertDialog(
@@ -185,17 +184,19 @@ Future<String?> _promptForPassword(BuildContext context) async {
       content: TextField(
         controller: passwordController,
         obscureText: true,
-        decoration: const InputDecoration(labelText: "Enter your password",focusColor: Colors.black),
-        
+        decoration: const InputDecoration(
+          labelText: "Enter your password",
+          focusColor: Colors.black,
+        ),
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.maybePop(context),
+          onPressed: () => Navigator.of(context).pop(null),
           style: TextButton.styleFrom(foregroundColor: Colors.black),
           child: const Text("Cancel"),
         ),
         TextButton(
-          onPressed: () => Navigator.maybePop(context),
+          onPressed: () => Navigator.of(context).pop(passwordController.text),
           style: TextButton.styleFrom(foregroundColor: Colors.black),
           child: const Text("Confirm"),
         ),
@@ -203,3 +204,4 @@ Future<String?> _promptForPassword(BuildContext context) async {
     ),
   );
 }
+
