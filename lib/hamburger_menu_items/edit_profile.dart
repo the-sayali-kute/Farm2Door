@@ -370,8 +370,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
               const SizedBox(height: 24),
               PhoneWidget(controller: phoneController),
               const SizedBox(height: 24),
-              AddressWidget(controller: addressController),
-              const SizedBox(height: 24),
 
               if (userRole.toLowerCase() == "farmer") ...[
                 AreaProximityWidget(

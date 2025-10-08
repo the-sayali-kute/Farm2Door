@@ -38,7 +38,6 @@ class _ProductListState extends State<ProductList> {
           .get();
       final userData = userDoc.data();
       debugPrint("found user");
-
       if (userData == null ||
           userData['latitude'] == null ||
           userData['longitude'] == null) {
@@ -99,8 +98,8 @@ class _ProductListState extends State<ProductList> {
         isLoading = false;
       });
     } catch (e, stacktrace) {
-      debugPrint("🔥 ERROR: $e");
-      debugPrint("🔍 Stacktrace: $stacktrace");
+      debugPrint("ERROR: $e");
+      debugPrint("Stacktrace: $stacktrace");
       if (!mounted) return;
       // Ensure the loading spinner stops even on error
       setState(() {
