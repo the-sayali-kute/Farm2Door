@@ -13,47 +13,54 @@ class DeleteAccount extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(errorBar(("No user is logged in.")));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(errorBar("No user is logged in."));
       return;
     }
 
     try {
-      final user = FirebaseAuth.instance.currentUser!;
-      final uid = user.uid;
-
-      // Ask user to re-enter password
+      // Step 1: Ask for password (for re-authentication)
       final password = await _promptForPassword(context);
-      if (password == null) return; // User cancelled
+      if (password == null || password.isEmpty) return;
 
-      // Re-authenticate user
       final cred = EmailAuthProvider.credential(
         email: user.email!,
         password: password,
       );
 
+      // Step 2: Reauthenticate user
       await user.reauthenticateWithCredential(cred);
 
-      // Delete from Firestore
-      await FirebaseFirestore.instance.collection("users").doc(uid).delete();
+      // Step 3: Delete Firestore document FIRST
+      await FirebaseFirestore.instance.collection("users").doc(user.uid).delete();
 
-      // Delete auth account
+      // Step 4: Delete user from Firebase Authentication
       await user.delete();
 
-      // Wait briefly for UI to show snackbar 
-      await Future.delayed(const Duration(milliseconds: 500));
+      // Step 5: Sign out just in case (clears session)
+      await FirebaseAuth.instance.signOut();
 
+      // Step 6: Navigate to Landing Page after short delay
       if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(successBar("Account deleted successfully."));
+        await Future.delayed(const Duration(seconds: 1));
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const LandingPage()),
           (route) => false,
         );
       }
+    } on FirebaseAuthException catch (e) {
+      String message = "Failed to delete account.";
+      if (e.code == 'wrong-password') {
+        message = "Incorrect password. Please try again.";
+      } else if (e.code == 'requires-recent-login') {
+        message = "Please log in again before deleting your account.";
+      }
+      ScaffoldMessenger.of(context).showSnackBar(errorBar(message));
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(errorBar("Failed to delete account: $e"));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(errorBar("Failed to delete account: $e"));
     }
   }
 
@@ -84,11 +91,9 @@ class DeleteAccount extends StatelessWidget {
           child: Column(
             children: [
               Lottie.asset(
-                "assets/animations/delete_account.json", // Replace with your delete animation
+                "assets/animations/delete_account.json",
                 height: 200,
                 repeat: true,
-                reverse: false,
-                animate: true,
               ),
               const SizedBox(height: 30),
               const Text(
@@ -139,7 +144,7 @@ class DeleteAccount extends StatelessWidget {
   void _showConfirmationDialog(BuildContext context) {
     showDialog(
       context: context,
-      barrierDismissible: false, // user must choose explicitly
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: const Text(
           "Are you sure?",
@@ -151,16 +156,14 @@ class DeleteAccount extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.maybePop(context)
-,
+            onPressed: () => Navigator.pop(context),
             style: TextButton.styleFrom(foregroundColor: Colors.green),
             child: const Text("Cancel"),
           ),
           TextButton(
             onPressed: () {
-              Navigator.maybePop(context);
- // close dialog
-              _deleteAccount(context); // proceed with deletion
+              Navigator.pop(context);
+              _deleteAccount(context);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text(
@@ -174,7 +177,7 @@ class DeleteAccount extends StatelessWidget {
   }
 }
 
-
+// 🔐 Prompt user to re-enter password
 Future<String?> _promptForPassword(BuildContext context) async {
   final TextEditingController passwordController = TextEditingController();
   return await showDialog<String>(
@@ -204,4 +207,3 @@ Future<String?> _promptForPassword(BuildContext context) async {
     ),
   );
 }
-
