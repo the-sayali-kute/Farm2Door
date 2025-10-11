@@ -1,13 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:forms/widgets/appbar.dart';
 import 'package:forms/hamburger_menu_items/hamburger_menu.dart';
 import 'package:forms/customer_home_page/product_card.dart';
 import 'package:forms/customer_home_page/carousal.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:forms/reusables/functions.dart';
-
-import 'package:geolocator/geolocator.dart';
 
 class ProductList extends StatefulWidget {
   const ProductList({super.key});
@@ -17,139 +15,160 @@ class ProductList extends StatefulWidget {
 }
 
 class _ProductListState extends State<ProductList> {
-  List<QueryDocumentSnapshot> filteredProducts = [];
+  List<Map<String, dynamic>> productsWithDistance = [];
   bool isLoading = true;
+  bool isLoadingMore = false;
+  bool hasMore = true;
+
+  final int _limit = 10;
+  DocumentSnapshot? _lastDoc;
+
+  double? userLat;
+  double? userLng;
+
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    _loadProductsWithinRadius();
+    _initUserLocationAndLoad();
+    _scrollController.addListener(_scrollListener);
   }
 
+  void _scrollListener() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 100 &&
+        !isLoadingMore &&
+        hasMore) {
+      _loadMoreProducts();
+    }
+  }
 
-  Future<void> _loadProductsWithinRadius() async {
+  Future<void> _initUserLocationAndLoad() async {
     try {
       final userId = FirebaseAuth.instance.currentUser!.uid;
-      debugPrint("Finding current user");
+      final userDoc =
+          await FirebaseFirestore.instance.collection("users").doc(userId).get();
 
-      final userDoc = await FirebaseFirestore.instance
-          .collection("users")
-          .doc(userId)
-          .get();
-      final userData = userDoc.data();
-      debugPrint("found user");
-      if (userData == null ||
-          userData['latitude'] == null ||
-          userData['longitude'] == null) {
-        if (!mounted) return;
-        setState(() {
-          isLoading = false;
-        });
+      if (userDoc.exists) {
+        userLat = userDoc["latitude"];
+        userLng = userDoc["longitude"];
+      }
+
+      await _loadProducts(); // initial batch
+    } catch (e) {
+      debugPrint("Error loading user location: $e");
+      setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> _loadProducts() async {
+    if (userLat == null || userLng == null) {
+      debugPrint("⚠️ No location found for user.");
+      setState(() => isLoading = false);
+      return;
+    }
+
+    try {
+      Query query = FirebaseFirestore.instance
+          .collection("products")
+          .orderBy(FieldPath.documentId)
+          .limit(_limit);
+
+      final snapshot = await query.get();
+      _lastDoc = snapshot.docs.isNotEmpty ? snapshot.docs.last : null;
+
+      final fetched = await _calculateDistances(snapshot.docs);
+
+      setState(() {
+        productsWithDistance = fetched;
+        isLoading = false;
+      });
+    } catch (e) {
+      debugPrint("Error loading products: $e");
+      setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> _loadMoreProducts() async {
+    if (_lastDoc == null || !hasMore) return;
+
+    setState(() => isLoadingMore = true);
+
+    try {
+      Query query = FirebaseFirestore.instance
+          .collection("products")
+          .orderBy(FieldPath.documentId)
+          .startAfterDocument(_lastDoc!)
+          .limit(_limit);
+
+      final snapshot = await query.get();
+      if (snapshot.docs.isEmpty) {
+        hasMore = false;
+        setState(() => isLoadingMore = false);
         return;
       }
 
-      final double userLat = userData['latitude'];
-      final double userLng = userData['longitude'];
-      debugPrint("📍 Customer location: lat=$userLat, lng=$userLng");
+      _lastDoc = snapshot.docs.last;
 
-      final productSnapshot = await FirebaseFirestore.instance
-          .collection("products")
-          .get();
-      final allProducts = productSnapshot.docs;
+      final fetched = await _calculateDistances(snapshot.docs);
 
-      List<QueryDocumentSnapshot> nearbyProducts = [];
-
-      for (final product in allProducts) {
-        final data = product.data(); // Add casting
-
-        final farmerId = data['farmerId'];
-        if (farmerId == null) continue;
-
-        final farmerDoc = await FirebaseFirestore.instance
-            .collection("users")
-            .doc(farmerId)
-            .get();
-        final farmerData = farmerDoc.data();
-
-        if (farmerData == null ||
-            farmerData['latitude'] == null ||
-            farmerData['longitude'] == null) {
-              debugPrint("⛔ Skipping $farmerId: missing lat/lng");
-          continue;
-        }
-
-        final double farmerLat = farmerData['latitude'];
-        final double farmerLng = farmerData['longitude'];
-
-        final distance = calculateDistance(
-          userLat,
-          userLng,
-          farmerLat,
-          farmerLng,
-        );
-
-        if (distance <= 5.0) {
-          nearbyProducts.add(product);
-        }
-      }
-      if (!mounted) return;
       setState(() {
-        filteredProducts = nearbyProducts;
-        isLoading = false;
+        productsWithDistance.addAll(fetched);
+        // Sort by distance ascending
+        productsWithDistance.sort((a, b) =>
+            (a["distance"] as double).compareTo(b["distance"] as double));
+        isLoadingMore = false;
       });
-    } catch (e, stacktrace) {
-      debugPrint("ERROR: $e");
-      debugPrint("Stacktrace: $stacktrace");
-      if (!mounted) return;
-      // Ensure the loading spinner stops even on error
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-
-  Future<Position?> getCurrentLocation() async {
-    try {
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.deniedForever ||
-            permission == LocationPermission.denied) {
-          return null;
-        }
-      }
-
-      return await Geolocator.getCurrentPosition().timeout(
-        const Duration(seconds: 10),
-        onTimeout: () => throw Exception("Location request timed out"),
-      );
     } catch (e) {
-      debugPrint("Error getting location: $e");
-      return null;
+      debugPrint("Error loading more products: $e");
+      setState(() => isLoadingMore = false);
     }
   }
 
-  // Future<List<DocumentSnapshot>> getNearbyProducts() async {
-  //   final position = await getCurrentLocation();
-  //   if (position == null) return [];
+  Future<List<Map<String, dynamic>>> _calculateDistances(
+      List<QueryDocumentSnapshot> docs) async {
+    List<Map<String, dynamic>> tempList = [];
 
-  //   final query = await FirebaseFirestore.instance.collection("products").get();
-  //   return query.docs.where((doc) {
-  //     final data = doc.data();
-  //     final lat = data['latitude'];
-  //     final lng = data['longitude'];
-  //     if (lat == null || lng == null) return false;
+    for (final doc in docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final farmerId = data["farmerId"];
 
-  //     final distance = calculateDistance(
-  //       position.latitude,
-  //       position.longitude,
-  //       lat,
-  //       lng,
-  //     );
-  //     return distance <= 5.0;
-  //   }).toList();
-  // }
+      if (farmerId == null) continue;
+
+      final farmerDoc = await FirebaseFirestore.instance
+          .collection("users")
+          .doc(farmerId)
+          .get();
+
+      if (!farmerDoc.exists ||
+          farmerDoc["latitude"] == null ||
+          farmerDoc["longitude"] == null) continue;
+
+      final double farmerLat = farmerDoc["latitude"];
+      final double farmerLng = farmerDoc["longitude"];
+
+      final distance =
+          calculateDistance(userLat!, userLng!, farmerLat, farmerLng);
+
+      tempList.add({
+        "doc": doc,
+        "distance": distance,
+      });
+    }
+
+    // Sort by distance ascending before returning
+    tempList.sort(
+        (a, b) => (a["distance"] as double).compareTo(b["distance"] as double));
+
+    return tempList;
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -161,14 +180,15 @@ class _ProductListState extends State<ProductList> {
         search: true,
         wishlist: true,
       ),
-      drawer: HamburgerMenu(),
+      drawer: const HamburgerMenu(),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
+              controller: _scrollController,
               padding: const EdgeInsets.all(16.0),
               children: [
                 const SizedBox(height: 20),
-                CustomCarousel(
+                const CustomCarousel(
                   imagePaths: [
                     'assets/images/p4.jpeg',
                     'assets/images/p1.jpeg',
@@ -178,27 +198,31 @@ class _ProductListState extends State<ProductList> {
                   ],
                 ),
                 const SizedBox(height: 20),
+
                 GridView.builder(
                   shrinkWrap: true,
-                  physics:
-                      NeverScrollableScrollPhysics(), // so ListView handles scrolling
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
                     crossAxisSpacing: 7,
                     mainAxisSpacing: 10,
                     childAspectRatio: 0.44,
                   ),
-                  itemCount: filteredProducts.length,
+                  itemCount: productsWithDistance.length,
                   itemBuilder: (context, index) {
-                    final product = filteredProducts[index];
-                    final data = product.data() as Map<String, dynamic>;
+                    final productDoc = productsWithDistance[index]["doc"];
+                    final data = productDoc.data() as Map<String, dynamic>;
+                    // final distance =
+                    //     productsWithDistance[index]["distance"] as double;
+
                     return ProductCard(
-                      path: data["img"] ?? "https://i.pinimg.com/736x/9c/56/8e/9c568ee61b9dd67e9dc61a77f1b1dbcd.jpg",
-                      productId: product.id,
+                      path: data["img"] ??
+                          "https://i.pinimg.com/736x/9c/56/8e/9c568ee61b9dd67e9dc61a77f1b1dbcd.jpg",
+                      productId: productDoc.id,
                       unit: "${data["unit"]}",
                       farmerId: data["farmerId"],
                       harvestedDate: data["harvestedDate"],
-                      productName: data["productName"],
+                      productName: "${data["productName"]}",
                       sellingPrice: data["sellingPrice"].toString(),
                       mrp: data["mrp"].toString(),
                       discountPercent: data["discountPercent"].toString(),
@@ -206,7 +230,12 @@ class _ProductListState extends State<ProductList> {
                     );
                   },
                 ),
-                const SizedBox(height: 20),
+
+                if (isLoadingMore)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
               ],
             ),
     );
