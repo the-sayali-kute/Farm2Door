@@ -55,7 +55,9 @@ class _ProductCardState extends State<ProductCard> {
     final farmerData = farmerDoc.data();
     if (farmerData == null ||
         farmerData['latitude'] == null ||
-        farmerData['longitude'] == null) return;
+        farmerData['longitude'] == null) {
+      return;
+    }
 
     final double lat = farmerData['latitude'];
     final double lng = farmerData['longitude'];

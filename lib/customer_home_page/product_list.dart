@@ -82,6 +82,7 @@ class _ProductListState extends State<ProductList> {
 
       setState(() {
         productsWithDistance = fetched;
+        hasMore = true;
         isLoading = false;
       });
     } catch (e) {
@@ -115,9 +116,10 @@ class _ProductListState extends State<ProductList> {
 
       setState(() {
         productsWithDistance.addAll(fetched);
-        // Sort by distance ascending
-        productsWithDistance.sort((a, b) =>
-            (a["distance"] as double).compareTo(b["distance"] as double));
+        productsWithDistance.sort(
+          (a, b) =>
+              (a["distance"] as double).compareTo(b["distance"] as double),
+        );
         isLoadingMore = false;
       });
     } catch (e) {
@@ -143,7 +145,9 @@ class _ProductListState extends State<ProductList> {
 
       if (!farmerDoc.exists ||
           farmerDoc["latitude"] == null ||
-          farmerDoc["longitude"] == null) continue;
+          farmerDoc["longitude"] == null) {
+        continue;
+      }
 
       final double farmerLat = farmerDoc["latitude"];
       final double farmerLng = farmerDoc["longitude"];
@@ -170,6 +174,16 @@ class _ProductListState extends State<ProductList> {
     super.dispose();
   }
 
+  // 🔄 REFRESH FUNCTIONALITY
+  Future<void> _refreshProducts() async {
+    setState(() {
+      isLoading = true;
+      hasMore = true;
+      _lastDoc = null;
+    });
+    await _loadProducts();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -181,63 +195,65 @@ class _ProductListState extends State<ProductList> {
         wishlist: true,
       ),
       drawer: const HamburgerMenu(),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(16.0),
-              children: [
-                const SizedBox(height: 20),
-                const CustomCarousel(
-                  imagePaths: [
-                    'assets/images/p4.jpeg',
-                    'assets/images/p1.jpeg',
-                    'assets/images/p6.jpeg',
-                    'assets/images/p7.jpeg',
-                    'assets/images/p9.jpeg',
-                  ],
-                ),
-                const SizedBox(height: 20),
-
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 7,
-                    mainAxisSpacing: 10,
-                    childAspectRatio: 0.44,
+      body: RefreshIndicator(
+        onRefresh: _refreshProducts, // 👈 swipe down to reload
+        color: Colors.green,
+        child: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : ListView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(), // 👈 important
+                padding: const EdgeInsets.all(16.0),
+                children: [
+                  const SizedBox(height: 20),
+                  const CustomCarousel(
+                    imagePaths: [
+                      'assets/images/p4.jpeg',
+                      'assets/images/p1.jpeg',
+                      'assets/images/p6.jpeg',
+                      'assets/images/p7.jpeg',
+                      'assets/images/p9.jpeg',
+                    ],
                   ),
-                  itemCount: productsWithDistance.length,
-                  itemBuilder: (context, index) {
-                    final productDoc = productsWithDistance[index]["doc"];
-                    final data = productDoc.data() as Map<String, dynamic>;
-                    // final distance =
-                    //     productsWithDistance[index]["distance"] as double;
+                  const SizedBox(height: 20),
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 7,
+                      mainAxisSpacing: 10,
+                      childAspectRatio: 0.44,
+                    ),
+                    itemCount: productsWithDistance.length,
+                    itemBuilder: (context, index) {
+                      final productDoc = productsWithDistance[index]["doc"];
+                      final data = productDoc.data() as Map<String, dynamic>;
 
-                    return ProductCard(
-                      path: data["img"] ??
-                          "https://i.pinimg.com/736x/9c/56/8e/9c568ee61b9dd67e9dc61a77f1b1dbcd.jpg",
-                      productId: productDoc.id,
-                      unit: "${data["unit"]}",
-                      farmerId: data["farmerId"],
-                      harvestedDate: data["harvestedDate"],
-                      productName: "${data["productName"]}",
-                      sellingPrice: data["sellingPrice"].toString(),
-                      mrp: data["mrp"].toString(),
-                      discountPercent: data["discountPercent"].toString(),
-                      presentStock: data["presentStock"].toString(),
-                    );
-                  },
-                ),
-
-                if (isLoadingMore)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    child: Center(child: CircularProgressIndicator()),
+                      return ProductCard(
+                        path: data["img"] ??
+                            "https://i.pinimg.com/736x/9c/56/8e/9c568ee61b9dd67e9dc61a77f1b1dbcd.jpg",
+                        productId: productDoc.id,
+                        unit: "${data["unit"]}",
+                        farmerId: data["farmerId"],
+                        harvestedDate: data["harvestedDate"],
+                        productName: "${data["productName"]}",
+                        sellingPrice: data["sellingPrice"].toString(),
+                        mrp: data["mrp"].toString(),
+                        discountPercent: data["discountPercent"].toString(),
+                        presentStock: data["presentStock"].toString(),
+                      );
+                    },
                   ),
-              ],
-            ),
+                  if (isLoadingMore)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                ],
+              ),
+      ),
     );
   }
 }
