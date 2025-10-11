@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:forms/app_startup/landing_page.dart';
 import 'package:forms/reusables/final_vars.dart';
 import 'package:forms/reusables/functions.dart';
 import 'package:lottie/lottie.dart';
@@ -82,15 +83,20 @@ class LogOut extends StatelessWidget {
     );
   }
 }
+// if successBar/errorBar are here
+
 Future<void> logoutUser(BuildContext context) async {
   try {
     await FirebaseAuth.instance.signOut();
 
-    // Pop all routes until root so the StreamBuilder can rebuild properly
-    Navigator.of(context).popUntil((route) => route.isFirst);
+    // ✅ Navigate to LandingPage and clear the navigation stack completely
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const LandingPage()),
+      (route) => false,
+    );
 
-    // Optional: Show feedback using a delay
-    Future.delayed(Duration(milliseconds: 500), () {
+    // ✅ Show success feedback after a short delay for smooth transition
+    Future.delayed(const Duration(milliseconds: 300), () {
       ScaffoldMessenger.of(context).showSnackBar(
         successBar("Logged out successfully."),
       );
@@ -102,4 +108,28 @@ Future<void> logoutUser(BuildContext context) async {
     );
   }
 }
+
+// Future<void> logoutUser(BuildContext context) async {
+//   try {
+//     await FirebaseAuth.instance.signOut();
+
+//     // Pop all routes until root so the StreamBuilder can rebuild properly
+//     // ignore: use_build_context_synchronously
+//     Navigator.of(context).popUntil((route) => route.isFirst);
+
+//     // Optional: Show feedback using a delay
+//     Future.delayed(Duration(milliseconds: 500), () {
+//       // ignore: use_build_context_synchronously
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         successBar("Logged out successfully."),
+//       );
+//     });
+//   } catch (e) {
+//     debugPrint("Logout error: $e");
+//     // ignore: use_build_context_synchronously
+//     ScaffoldMessenger.of(context).showSnackBar(
+//       errorBar("Logout failed. Please try again."),
+//     );
+//   }
+// }
 

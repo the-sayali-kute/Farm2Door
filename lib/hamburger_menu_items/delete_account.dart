@@ -13,8 +13,9 @@ class DeleteAccount extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(errorBar("No user is logged in."));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(errorBar("No user is logged in."));
       return;
     }
 
@@ -32,7 +33,10 @@ class DeleteAccount extends StatelessWidget {
       await user.reauthenticateWithCredential(cred);
 
       // Step 3: Delete Firestore document FIRST
-      await FirebaseFirestore.instance.collection("users").doc(user.uid).delete();
+      await FirebaseFirestore.instance
+          .collection("users")
+          .doc(user.uid)
+          .delete();
 
       // Step 4: Delete user from Firebase Authentication
       await user.delete();
@@ -42,8 +46,9 @@ class DeleteAccount extends StatelessWidget {
 
       // Step 6: Navigate to Landing Page after short delay
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(successBar("Account deleted successfully."));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(successBar("Account deleted successfully."));
         await Future.delayed(const Duration(seconds: 1));
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const LandingPage()),
@@ -59,8 +64,9 @@ class DeleteAccount extends StatelessWidget {
       }
       ScaffoldMessenger.of(context).showSnackBar(errorBar(message));
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(errorBar("Failed to delete account: $e"));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(errorBar("Failed to delete account: $e"));
     }
   }
 
@@ -185,11 +191,15 @@ Future<String?> _promptForPassword(BuildContext context) async {
     builder: (context) => AlertDialog(
       title: const Text("Confirm Password"),
       content: TextField(
+        cursorColor: Colors.black,
         controller: passwordController,
         obscureText: true,
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
           labelText: "Enter your password",
           focusColor: Colors.black,
+          border: border,
+          focusedBorder: border,
+          enabledBorder: border,
         ),
       ),
       actions: [
