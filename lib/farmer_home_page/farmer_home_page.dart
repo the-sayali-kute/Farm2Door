@@ -62,8 +62,109 @@ Future<List<QueryDocumentSnapshot>> fetchMyProducts() async {
   return snapshot.docs; // Each doc is a QueryDocumentSnapshot
 }
 
+// Widget buildHomePage() {
+//   final String farmerId = FirebaseAuth.instance.currentUser!.uid;
+
+//   return FutureBuilder<QuerySnapshot>(
+//     future: FirebaseFirestore.instance
+//         .collection('products')
+//         .where('farmerId', isEqualTo: farmerId)
+//         .get(),
+//     builder: (context, snapshot) {
+//       if (snapshot.connectionState == ConnectionState.waiting) {
+//         return const Center(child: CircularProgressIndicator());
+//       }
+
+//       if (snapshot.hasError) {
+//         return const Center(child: Text("Something went wrong"));
+//       }
+
+//       return SingleChildScrollView(
+//         padding: const EdgeInsets.all(16),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             greetingCard(),
+//             const SizedBox(height: 16),
+//             const Text(
+//               'My Products',
+//               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+//             ),
+//             const SizedBox(height: 8),
+//             FutureBuilder(
+//               future: fetchMyProducts(),
+//               builder: (context, snapshot) {
+//                 if (snapshot.connectionState == ConnectionState.waiting) {
+//                   return const Center(child: CircularProgressIndicator());
+//                 }
+//                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
+//                   return Center(
+//                     child: Column(
+//                       children: [
+//                         SizedBox(height: 140),
+//                         Text(
+//                           "No products found",
+//                           style: TextStyle(
+//                             fontSize: 20,
+//                             fontWeight: FontWeight.bold,
+//                           ),
+//                         ),
+//                         SizedBox(height: 20),
+//                         Container(
+//                           decoration: BoxDecoration(
+//                             borderRadius: BorderRadius.circular(18),
+//                             gradient: gradient,
+//                           ),
+//                           child: TextButton(
+//                             onPressed: () {
+//                               Navigator.of(context).push(
+//                                 MaterialPageRoute(
+//                                   builder: (context) => AddProductPage(),
+//                                 ),
+//                               );
+//                             },
+//                             style: TextButton.styleFrom(
+//                               minimumSize: const Size(150, 50),
+//                               backgroundColor: Colors.transparent,
+//                               shadowColor: Colors.transparent,
+//                             ),
+//                             child: const Text(
+//                               "Add a product",
+//                               style: TextStyle(
+//                                 fontSize: 15,
+//                                 fontWeight: FontWeight.bold,
+//                                 color: Colors.white,
+//                               ),
+//                             ),
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   );
+//                 }
+//                 return Column(
+//                   children: snapshot.data!
+//                       .map<Widget>(
+//                         (productDoc) => productCard(productDoc, context),
+//                       )
+//                       .toList(),
+//                 );
+//               },
+//             ),
+//           ],
+//         ),
+//       );
+//     },
+//   );
+// }
+
 Widget buildHomePage() {
   final String farmerId = FirebaseAuth.instance.currentUser!.uid;
+
+  // Define a reload function for pull-to-refresh
+  Future<void> _refreshProducts() async {
+    await Future.delayed(const Duration(milliseconds: 600)); // smooth UX delay
+  }
 
   return FutureBuilder<QuerySnapshot>(
     future: FirebaseFirestore.instance
@@ -79,79 +180,89 @@ Widget buildHomePage() {
         return const Center(child: Text("Something went wrong"));
       }
 
-      return SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            greetingCard(),
-            const SizedBox(height: 16),
-            const Text(
-              'My Products',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            FutureBuilder(
-              future: fetchMyProducts(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(
-                    child: Column(
-                      children: [
-                        SizedBox(height: 140),
-                        Text(
-                          "No products found",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(18),
-                            gradient: gradient,
-                          ),
-                          child: TextButton(
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => AddProductPage(),
-                                ),
-                              );
-                            },
-                            style: TextButton.styleFrom(
-                              minimumSize: const Size(150, 50),
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
+      // ✅ Wrap everything inside RefreshIndicator
+      return RefreshIndicator(
+        color: Colors.green,
+        onRefresh: () async {
+          await _refreshProducts();
+          // Force rebuild by calling setState
+          (context as Element).reassemble();
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(), // important for pull gesture
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              greetingCard(),
+              const SizedBox(height: 16),
+              const Text(
+                'My Products',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              FutureBuilder(
+                future: fetchMyProducts(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 140),
+                          const Text(
+                            "No products found",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
                             ),
-                            child: const Text(
-                              "Add a product",
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                          ),
+                          const SizedBox(height: 20),
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(18),
+                              gradient: gradient,
+                            ),
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => const AddProductPage(),
+                                  ),
+                                );
+                              },
+                              style: TextButton.styleFrom(
+                                minimumSize: const Size(150, 50),
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                              ),
+                              child: const Text(
+                                "Add a product",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                    );
+                  }
+                  return Column(
+                    children: snapshot.data!
+                        .map<Widget>(
+                          (productDoc) => productCard(productDoc, context),
+                        )
+                        .toList(),
                   );
-                }
-                return Column(
-                  children: snapshot.data!
-                      .map<Widget>(
-                        (productDoc) => productCard(productDoc, context),
-                      )
-                      .toList(),
-                );
-              },
-            ),
-          ],
+                },
+              ),
+            ],
+          ),
         ),
       );
     },
@@ -451,3 +562,4 @@ Widget placeholderBox(String text) {
     child: Text(text, style: const TextStyle(color: Colors.grey)),
   );
 }
+

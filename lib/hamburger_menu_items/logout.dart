@@ -90,6 +90,7 @@ Future<void> logoutUser(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
 
     // ✅ Navigate to LandingPage and clear the navigation stack completely
+    // ignore: use_build_context_synchronously
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => const LandingPage()),
       (route) => false,
@@ -97,12 +98,14 @@ Future<void> logoutUser(BuildContext context) async {
 
     // ✅ Show success feedback after a short delay for smooth transition
     Future.delayed(const Duration(milliseconds: 300), () {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         successBar("Logged out successfully."),
       );
     });
   } catch (e) {
     debugPrint("Logout error: $e");
+    // ignore: use_build_context_synchronously
     ScaffoldMessenger.of(context).showSnackBar(
       errorBar("Logout failed. Please try again."),
     );
