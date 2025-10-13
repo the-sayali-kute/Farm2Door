@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:forms/farmer_home_page/dashboard/farmer_dashboard_page.dart';
 import 'package:forms/farmer_home_page/farmer_home_page.dart';
 import 'package:forms/farmer_home_page/orders/order_page.dart';
-import 'package:forms/farmer_home_page/update_page.dart';
 
 class FarmerMainPage extends StatefulWidget {
   const FarmerMainPage({super.key});
@@ -18,21 +18,18 @@ class _FarmerMainPageState extends State<FarmerMainPage> {
   void initState() {
     super.initState();
     _initialize(); // 🔁 Call async setup
-
   }
 
   Future<void> _initialize() async {
-    
-      pages = [FarmerHomePage() ,FarmerOrderPage(), UpdatePage()];
-    
-  }  
+    pages = [FarmerHomePage(), FarmerOrderPage(), FarmerDashboardPage()];
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: pages.isEmpty
-            ? Center(child: CircularProgressIndicator())
-            : IndexedStack(index: currentPage, children: pages),
+      body: pages.isEmpty
+          ? Center(child: CircularProgressIndicator())
+          : IndexedStack(index: currentPage, children: pages),
       bottomNavigationBar: BottomNavigationBar(
         selectedFontSize: 10,
         unselectedFontSize: 10,
@@ -54,7 +51,7 @@ class _FarmerMainPageState extends State<FarmerMainPage> {
             label: "Orders",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.update),
+            icon: Icon(Icons.dashboard_outlined),
             label: "Updates",
           ),
         ],
@@ -62,16 +59,15 @@ class _FarmerMainPageState extends State<FarmerMainPage> {
     );
   }
 }
-  Widget containerCard({required List<Widget> children}) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.teal.shade100,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
-      ),
-      padding: const EdgeInsets.all(12),
-      child: Column(children: children),
-    );
-  }
 
-
+Widget containerCard({required List<Widget> children}) {
+  return Container(
+    decoration: BoxDecoration(
+      color: Colors.teal.shade100,
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+    ),
+    padding: const EdgeInsets.all(12),
+    child: Column(children: children),
+  );
+}

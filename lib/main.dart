@@ -4,6 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:forms/app_startup/splash_screen.dart';
 import 'firebase_options.dart';
 
+//notifications
+// 1. When farmer adds a product -> notification to farmer & the customer too
+// 2. When farmer receives a new order
+// 3. When farmer accepts/rejects/completes order -> notification to customer
+// 4. 
+// 
+// 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   debugPrintGestureArenaDiagnostics = false;

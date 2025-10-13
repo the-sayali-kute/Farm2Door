@@ -162,7 +162,7 @@ Widget buildHomePage() {
   final String farmerId = FirebaseAuth.instance.currentUser!.uid;
 
   // Define a reload function for pull-to-refresh
-  Future<void> _refreshProducts() async {
+  Future<void> refreshProducts() async {
     await Future.delayed(const Duration(milliseconds: 600)); // smooth UX delay
   }
 
@@ -184,7 +184,7 @@ Widget buildHomePage() {
       return RefreshIndicator(
         color: Colors.green,
         onRefresh: () async {
-          await _refreshProducts();
+          await refreshProducts();
           // Force rebuild by calling setState
           (context as Element).reassemble();
         },
