@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:forms/authentication/login_form.dart';
+import 'package:forms/notifications/get_server_key.dart';
+import 'package:forms/notifications/notification_services.dart';
 import 'package:forms/reusables/functions.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -27,8 +29,8 @@ Future<bool> createUserWithEmailAndPassword({
     if (query.docs.isNotEmpty) {
       debugPrint("Email already exists in Firestore: $email");
       ScaffoldMessenger.of(
-                                    context,
-                                  ).showSnackBar(errorBar("Email already exists"));
+        context,
+      ).showSnackBar(errorBar("Email already exists"));
       return false;
     }
     final userCredential = await FirebaseAuth.instance
@@ -130,6 +132,14 @@ Future<Map<String, dynamic>> loginWithEmailPassWord(
       Position? position = await fetchLocation().timeout(
         const Duration(seconds: 10),
       );
+      GetServerKey getServerKey = GetServerKey();
+      String serverKey = await getServerKey.getServerKeyToken();
+      debugPrint(
+        "-----------------------------------------------------------------$serverKey",
+      );
+      NotificationServices notificationServices = NotificationServices();
+      notificationServices.requestNotificationPermission();
+      String? fcmToken = await notificationServices.getDeviceToken();
 
       if (position != null) {
         await FirebaseFirestore.instance
@@ -140,6 +150,13 @@ Future<Map<String, dynamic>> loginWithEmailPassWord(
               "longitude": position.longitude,
             }, SetOptions(merge: true));
       }
+      if (fcmToken != null) {
+        await FirebaseFirestore.instance
+            .collection("users")
+            .doc(userCredential.user!.uid)
+            .set({"fcmToken": fcmToken}, SetOptions(merge: true));
+      }
+      debugPrint("-----------------------------Token saved: $fcmToken");
     } catch (e) {
       debugPrint("⚠ Location update skipped: $e");
     }

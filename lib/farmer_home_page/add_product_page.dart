@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:forms/authentication/db_functions.dart';
 import 'package:forms/widgets/appbar.dart';
 import 'package:forms/farmer_home_page/farmer_main_page.dart';
 import 'package:forms/reusables/final_vars.dart';
@@ -591,7 +592,11 @@ class _AddProductPage extends State<AddProductPage> {
                       await FirebaseFirestore.instance
                           .collection('products')
                           .add(productData);
-
+                      await sendNotificationToFarmer(
+                        title: "New Product Added",
+                        body:
+                            "Your product '${productNameController.text}' is now live!",
+                      );
                       ScaffoldMessenger.of(
                         context,
                       ).showSnackBar(successBar("Product added successfully!"));

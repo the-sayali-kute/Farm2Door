@@ -1,5 +1,61 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+Future<void> sendNotificationToFarmer({
+  required String title,
+  required String body,
+}) async {
+  // Your Firebase Server key (get it from Firebase Console > Project Settings > Cloud Messaging)
+  const serverKey = "YOUR_SERVER_KEY_HERE"; // 🔒 keep it secret!
+
+  final uid = FirebaseAuth.instance.currentUser!.uid;
+  final userDoc =
+      await FirebaseFirestore.instance.collection('users').doc(uid).get();
+  final token = userDoc['fcmToken'];
+
+  if (token == null) return;
+
+  final data = {
+    "to": token,
+    "notification": {
+      "title": title,
+      "body": body,
+    },
+    "android": {
+      "priority": "high",
+    },
+    "data": {
+      "click_action": "FLUTTER_NOTIFICATION_CLICK",
+      "screen": "farmer_dashboard",
+    }
+  };
+
+  await http.post(
+    Uri.parse("https://fcm.googleapis.com/fcm/send"),
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "key=$serverKey",
+    },
+    body: jsonEncode(data),
+  );
+}
+
+
+
+Future<void> saveFCMToken() async {
+  String? token = await FirebaseMessaging.instance.getToken();
+  String uid = FirebaseAuth.instance.currentUser!.uid;
+
+  if (token != null) {
+    await FirebaseFirestore.instance.collection('users').doc(uid).update({
+      'fcmToken': token,
+    });
+  }
+}
 
 Future<void>? storeUserDetails({required String name,required String role,required String password,required String email,required String address,required int phone})async{
   try{
