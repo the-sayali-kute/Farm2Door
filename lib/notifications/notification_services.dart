@@ -1,7 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart' as AppSettings;
 
 class NotificationServices {
@@ -14,21 +13,22 @@ class NotificationServices {
       carPlay: true,
       criticalAlert: true,
       provisional: true,
-      sound: true
+      sound: true,
     );
-    if(settings.authorizationStatus == AuthorizationStatus.authorized){
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
       debugPrint("User granted notification permission");
-    }else if (settings.authorizationStatus == AuthorizationStatus.provisional){
+    } else if (settings.authorizationStatus ==
+        AuthorizationStatus.provisional) {
       debugPrint("User provisional permission granted");
-    }else{
+    } else {
       debugPrint("User hasn't given the notification permission");
-      Future.delayed(Duration(seconds: 3),(){
+      Future.delayed(Duration(seconds: 3), () {
         AppSettings.openAppSettings();
       });
     }
   }
 
-  Future<String?> getDeviceToken()async{
+  Future<String?> getDeviceToken() async {
     requestNotificationPermission();
     final fcmToken = await _firebaseMessaging.getToken();
     debugPrint("---------------------FCM Token : $fcmToken");

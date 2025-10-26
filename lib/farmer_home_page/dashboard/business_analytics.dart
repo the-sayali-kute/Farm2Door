@@ -1,6 +1,4 @@
-// lib/farmer_dashboard/business_analytics.dart
 import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -302,9 +300,9 @@ class _BusinessAnalyticsWidgetState extends State<BusinessAnalyticsWidget> {
                 _buildTopProductsSection(),
                 const SizedBox(height: 8),
                 _buildLowStockSection(),
+
                 // const SizedBox(height: 8),
                 // _buildCategoryPie(),
-
                 const SizedBox(height: 16),
                 Text(
                   "Recent Activity",

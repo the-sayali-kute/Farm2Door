@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -474,7 +473,7 @@ class _AddProductPage extends State<AddProductPage> {
               SwitchListTile(
                 title: Text("Harvested today?"),
                 value: harvestedToday,
-                activeThumbColor: Color(0xFF4CA330),
+                activeColor: Color(0xFF4CA330),
                 onChanged: (bool value) {
                   setState(() {
                     harvestedToday = value;
@@ -491,13 +490,13 @@ class _AddProductPage extends State<AddProductPage> {
               ),
               SwitchListTile(
                 title: Text("Any pesticides used?"),
-                activeThumbColor: Color(0xFF4CA330),
+                activeColor: Color(0xFF4CA330),
                 value: pesticidesUsed,
                 onChanged: (val) => setState(() => pesticidesUsed = val),
               ),
               SwitchListTile(
                 title: Text("Organically grown?"),
-                activeThumbColor: Color(0xFF4CA330),
+                activeColor: Color(0xFF4CA330),
                 value: isOrganic,
                 onChanged: (val) => setState(() => isOrganic = val),
               ),

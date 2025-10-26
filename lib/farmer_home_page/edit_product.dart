@@ -237,7 +237,7 @@ class _EditProductState extends State<EditProduct> {
               SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 style: TextStyle(fontSize: 16, color: Colors.black),
-                initialValue: selectedCategory,
+                value: selectedCategory,
                 items: categories
                     .map(
                       (cat) => DropdownMenuItem(value: cat, child: Text(cat)),
@@ -255,7 +255,7 @@ class _EditProductState extends State<EditProduct> {
               SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 style: TextStyle(fontSize: 16, color: Colors.black),
-                initialValue: selectedUnit,
+                value: selectedUnit,
                 items: units
                     .map(
                       (unit) =>
@@ -329,19 +329,19 @@ class _EditProductState extends State<EditProduct> {
               SwitchListTile(
                 title: Text("Harvested Today?"),
                 value: harvestedToday,
-                activeThumbColor: Color(0xFF4CA330),
+                activeColor: Color(0xFF4CA330),
                 onChanged: (val) => setState(() => harvestedToday = val),
               ),
               SwitchListTile(
                 title: Text("Any Pesticides Used?"),
                 value: pesticidesUsed,
-                activeThumbColor: Color(0xFF4CA330),
+                activeColor: Color(0xFF4CA330),
                 onChanged: (val) => setState(() => pesticidesUsed = val),
               ),
               SwitchListTile(
                 title: Text("Organically Grown?"),
                 value: isOrganic,
-                activeThumbColor: Color(0xFF4CA330),
+                activeColor: Color(0xFF4CA330),
                 onChanged: (val) => setState(() => isOrganic = val),
               ),
               SizedBox(height: 20),
