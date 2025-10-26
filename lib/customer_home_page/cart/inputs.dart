@@ -82,7 +82,10 @@ final buttonStyle_greenshade = TextButton.styleFrom(
   backgroundColor: Colors.green,
   foregroundColor: Colors.white,
   minimumSize: Size(double.infinity, 50),
-  shape: LinearBorder(),
+  // LinearBorder does not exist in Flutter. Use RoundedRectangleBorder for button shape.
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(8),
+  ),
 );
 
 final buttonTextStyle = TextStyle(
@@ -106,7 +109,7 @@ class _RoleWidgetState extends State<RoleWidget> {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
-      initialValue: selectedRole,
+      value: selectedRole,
       style: TextStyle(fontSize: 16, color: Colors.black),
       decoration: InputDecoration(
         labelText: "Role",

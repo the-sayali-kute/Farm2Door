@@ -1,5 +1,5 @@
 name: forms
-description: "A new Flutter project."
+description: "Farm2Door Flutter Project"
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -8,9 +8,10 @@ environment:
 
 dependencies:
   flutter:
-    sdk: flutter  
-  carousel_slider: ^4.2.0 
-  smooth_page_indicator: ^1.1.0 
+    sdk: flutter
+    
+  carousel_slider: ^4.2.0
+  smooth_page_indicator: ^1.1.0
   image_picker: ^1.1.2
   firebase_storage: ^12.4.9
   cupertino_icons: ^1.0.8
@@ -33,7 +34,10 @@ dependencies:
   flutter_map_tile_caching: ^10.1.1
   flutter_map: ^8.1.1
   font_awesome_flutter: ^10.8.0
-  fl_chart: ^1.1.1
+
+  # FIX: Downgraded to match Flutter SDK
+  fl_chart: ^1.0.0 
+
   googleapis_auth: ^2.0.0
   http: ^1.5.0
 
@@ -42,10 +46,10 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^5.0.0
 
-flutter_icons:  # <-- This is at the root level
+flutter_icons:
   android: true
   ios: true
-  image_path: "assets/images/image.png" # Update with your actual icon path
+  image_path: "assets/images/image.png"
 
 flutter_native_splash:
   color: "#ffffff"
@@ -56,6 +60,7 @@ flutter_native_splash:
 
 flutter:
   uses-material-design: true
+
   assets:
     - assets/images/
     - assets/fonts/
