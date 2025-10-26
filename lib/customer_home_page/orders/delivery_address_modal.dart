@@ -48,12 +48,15 @@ class _DeliveryAddressModalState extends State<DeliveryAddressModal> {
           merge: true,
         ), // Only update the provided fields in the document without deleting the existing ones.
       );
+      // ignore: use_build_context_synchronously
       Navigator.maybePop(context);
 
       ScaffoldMessenger.of(
+        // ignore: use_build_context_synchronously
         context,
       ).showSnackBar(successBar("Location updated successfully"));
       Navigator.push(
+        // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(
           builder: (context) {
@@ -63,6 +66,7 @@ class _DeliveryAddressModalState extends State<DeliveryAddressModal> {
       );
     }else{
       ScaffoldMessenger.of(
+        // ignore: use_build_context_synchronously
         context,
       ).showSnackBar(errorBar("Failed to update location"));
     }

@@ -90,7 +90,7 @@ class _LoginFormState extends State<LoginForm> {
                         SizedBox(
                           height: 25,
                         ), // Consistent spacing between fields
-                        passwordWidget(),
+                        PasswordWidget(),
                         GestureDetector(
                           onTap: () {
                             Navigator.of(context).push(
@@ -112,6 +112,8 @@ class _LoginFormState extends State<LoginForm> {
                         Center(
                           child: TextButton(
                             onPressed: () async {
+                              
+
                               if (emailController.text.isEmpty ||
                                   passwordController.text.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(

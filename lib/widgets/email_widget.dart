@@ -17,12 +17,19 @@ class emailWidget extends StatelessWidget {
         enabledBorder: border,
       ),
       validator: (value) {
-          if (value == null || value.trim().isEmpty) {
-            return 'Email is required';
-          }
-          return null;
-        },
-
+        final trimmedValue = value?.trim() ?? '';
+        if (trimmedValue.isEmpty) {
+          return 'Email is required';
+        }
+        // Regex for email validation
+        final emailRegex = RegExp(
+          r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+        );
+        if (!emailRegex.hasMatch(trimmedValue)) {
+          return 'Enter valid email';
+        }
+        return null; // Validation passed
+      },
     );
   }
 }

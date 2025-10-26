@@ -35,10 +35,12 @@ class _PickLocationMapState extends State<PickLocationMap> {
       }, SetOptions(merge: true));
 
       ScaffoldMessenger.of(
+        // ignore: use_build_context_synchronously
         context,
       ).showSnackBar(successBar("Location updated successfully"));
     } catch (e) {
       ScaffoldMessenger.of(
+        // ignore: use_build_context_synchronously
         context,
       ).showSnackBar(errorBar("Failed to update location: $e"));
     }

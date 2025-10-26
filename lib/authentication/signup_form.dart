@@ -1,6 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:forms/authentication/auth_functions.dart';
 import 'package:forms/authentication/login_form.dart';
@@ -10,7 +7,6 @@ import 'package:forms/reusables/final_vars.dart';
 import 'package:forms/widgets/full_name_widget.dart';
 import 'package:forms/widgets/email_widget.dart';
 import 'package:forms/widgets/password_widget.dart';
-import 'package:forms/widgets/address_widget.dart';
 import 'package:forms/widgets/phone_widget.dart';
 import 'package:forms/farmer_home_page/areaproximity.dart';
 
@@ -97,10 +93,10 @@ class _SignupFormState extends State<SignupForm> {
                         SizedBox(height: 25),
                         PhoneWidget(),
                         SizedBox(height: 25),
-                        passwordWidget(),
+                        PasswordWidget(),
                         SizedBox(height: 25),
-                        AddressWidget(),
-                        SizedBox(height: 25),
+                        // AddressWidget(),
+                        // SizedBox(height: 25),
                         if (selectedRole == "Farmer") ...[
                           AreaProximityWidget(
                             radius: deliveryRadius,
@@ -119,50 +115,29 @@ class _SignupFormState extends State<SignupForm> {
                                 return;
                               }
                               try {
-                                await createUserWithEmailAndPassword(
+                                bool isValid = true;
+                                isValid = await createUserWithEmailAndPassword(
                                   email: emailController.text,
                                   password: passwordController.text,
                                   name: fullNameController.text,
                                   phone: phoneController.text,
-                                  address: addressController.text,
+                                  // address: addressController.text,
                                   role: selectedRole.toLowerCase(),
                                   context: context,
                                   deliveryRadius: selectedRole == "Farmer"
                                       ? deliveryRadius.toInt()
                                       : null,
                                 );
-
-                                if (selectedRole == "Farmer") {
-                                  await FirebaseMessaging.instance
-                                      .getToken()
-                                      .then((token) {
-                                        FirebaseFirestore.instance
-                                            .collection('fcmTokens')
-                                            .doc(
-                                              FirebaseAuth
-                                                  .instance
-                                                  .currentUser!
-                                                  .uid,
-                                            )
-                                            .set({'token': token});
-                                      });
-
+                                if(!isValid){
                                   Navigator.pushReplacement(
                                     // ignore: use_build_context_synchronously
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => LoginForm(),
-                                    ),
-                                  );
-                                } else if (selectedRole == "Buyer") {
-                                  Navigator.pushReplacement(
-                                    // ignore: use_build_context_synchronously
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => LoginForm(),
+                                      builder: (context) => SignupForm(),
                                     ),
                                   );
                                 }
+                                
                               } catch (e) {
                                 ScaffoldMessenger.of(
                                   // ignore: use_build_context_synchronously

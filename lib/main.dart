@@ -4,6 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:forms/app_startup/splash_screen.dart';
 import 'firebase_options.dart';
 
+//notifications
+// 1. When farmer adds a product -> notification to farmer & the customer too
+// 2. When farmer receives a new order
+// 3. When farmer accepts/rejects/completes order -> notification to customer
+// 4.
+//
+//
+String serverKey = "ya29.c.c0ASRK0GZWbjFh6e1kBAnxTnwOb1uckGsyMViNf4Hl38g3k-0H_A5YzgZhZXIpYdQBcWr0owiV_Ybo86t1WTi5cif-A29ardOOFqmtc3t9xlHi80rH80cwVAZK1Du0SFg-soq4ll5KmMjpAqw7nGf8EWKON-600ncv2Z3FtOraMyp4xno57CIL8coY_T77Vziz6jkA3Rzg4HXAGU7SvLo3TrjxSjK8ChiGBGNzMblIwoYzXuM7F0LKJYGyjlikkZJolPgcpfzEof7ns6CiZsmaKsVNao0CA9YNyoU1EEN8RpOKnt5gBsvst9YUP6378xNhBWuJ89n4dcT8yUksblvyIrCd0__TwiGO1PGqDJbXwsGJyFEJouls77tTiQXLDwL391Pmo0ju9YZemX7tQeZpXakg2IrrqcY4pRu57a2218-43vfgbaF69uIahgJtVb-hg5wI0pS4qi-c24bFpwxfau9zgtqzmx3p-uXJ0vojaByX1iu26QplWW_f1vZyJuynnlxhBd79U8uukk67xwye0779j1d0rd6gyujYgejpbO-ZjVqzOvObY7i0Y-mJbBROsccJ8nBYmc1RddMRi7cBsvSx3sfsSW3Bl46S3UFWidzi9w-0baFk-VBsr1QBfUV934YIqZgpfQegaSXmYWvswe24kOxWk2gQxq052vdUazX1duqt1ZIeOx24Vql91ZlgSbaQkvnqZsbzdsrIkwpX7qsQguyevlkfV0cRm7RbSv_ncls7XeXFtY3Q9IyjrYzVwMaXRu_Un8x6uvIasshcYB8BSxOZYYmueF3wJcJgVRc3vvWo0eYglnlfka-etM0U-i4Uq1Vwi_Y_WaXajb0024tbbgi0qfe0qxmwleba3s6qsiQpQwg9Iiy6h4-6pc74kf8ViazvZl16a8hbgFVUezQ4rpgMmbouBhIWtupX2cd7OUI8V4Mw";
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   debugPrintGestureArenaDiagnostics = false;

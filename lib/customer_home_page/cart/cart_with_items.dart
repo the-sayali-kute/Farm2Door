@@ -1,8 +1,6 @@
-import 'dart:convert';
 // ignore: depend_on_referenced_packages
 import 'package:forms/customer_home_page/cart/cart_empty.dart';
 import 'package:forms/customer_home_page/orders/delivery_address_modal.dart';
-import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -104,15 +102,15 @@ class _CartWithItemsState extends State<CartWithItems> {
 
           final token = tokenSnap.data()?['token'];
 
-          if (token != null) {
-            await sendNotificationToFarmer(
-              token,
-              "New Order Received",
-              "You got an order for ${item['productName']}",
-            );
+          // if (token != null) {
+          //   await sendNotificationToFarmer(
+          //     token,
+          //     "New Order Received",
+          //     "You got an order for ${item['productName']}",
+          //   );
 
-            notifiedFarmers.add(farmerId);
-          }
+          //   notifiedFarmers.add(farmerId);
+          // }
         }
       }
       showModalBottomSheet(
@@ -380,28 +378,28 @@ class _CartWithItemsState extends State<CartWithItems> {
   }
 }
 
-Future<void> sendNotificationToFarmer(
-  String token,
-  String title,
-  String body,
-) async {
-  const serverKey = 'YOUR_SERVER_KEY';
+// Future<void> sendNotificationToFarmer(
+//   String token,
+//   String title,
+//   String body, {required String title},
+// ) async {
+//   const serverKey = 'YOUR_SERVER_KEY';
 
-  final response = await http.post(
-    Uri.parse('https://fcm.googleapis.com/fcm/send'),
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'key=$serverKey',
-    },
-    body: jsonEncode({
-      'to': token,
-      'notification': {'title': title, 'body': body},
-    }),
-  );
+//   final response = await http.post(
+//     Uri.parse('https://fcm.googleapis.com/fcm/send'),
+//     headers: {
+//       'Content-Type': 'application/json',
+//       'Authorization': 'key=$serverKey',
+//     },
+//     body: jsonEncode({
+//       'to': token,
+//       'notification': {'title': title, 'body': body},
+//     }),
+//   );
 
-  debugPrint("FCM Response Status: ${response.statusCode}");
-  debugPrint("FCM Response Body: ${response.body}");
-}
+//   debugPrint("FCM Response Status: ${response.statusCode}");
+//   debugPrint("FCM Response Body: ${response.body}");
+// }
 
 Widget summaryRow({
   required String label,

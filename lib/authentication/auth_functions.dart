@@ -3,63 +3,81 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:forms/authentication/login_form.dart';
+import 'package:forms/notifications/get_server_key.dart';
+import 'package:forms/notifications/notification_services.dart';
 import 'package:forms/reusables/functions.dart';
 import 'package:geolocator/geolocator.dart';
 
 // import 'package:firebase_core/firebase_core.dart';
-Future<void> createUserWithEmailAndPassword({
+Future<bool> createUserWithEmailAndPassword({
   required String email,
   required String password,
   required String name,
   required String phone,
   required String role,
-  required String address,
+  // required String address,
   required BuildContext context,
   int? deliveryRadius,
 }) async {
   try {
+    final query = await FirebaseFirestore.instance
+        .collection('users')
+        .where('email', isEqualTo: email.trim())
+        .limit(1)
+        .get();
+
+    if (query.docs.isNotEmpty) {
+      debugPrint("Email already exists in Firestore: $email");
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(errorBar("Email already exists"));
+      return false;
+    }
     final userCredential = await FirebaseAuth.instance
-    .createUserWithEmailAndPassword(email: email, password: password);
-final User user = userCredential.user!;
-final uid = user.uid;
+        .createUserWithEmailAndPassword(email: email, password: password);
+    final User user = userCredential.user!;
+    final uid = user.uid;
 
-// Fetch location
-Position? position = await fetchLocation();
+    // Fetch location
+    Position? position = await fetchLocation();
 
-// Build user map
-final userMap = {
-  "name": name,
-  "email": email,
-  "phone": phone,
-  "address": address,
-  "role": role,
-  "password": password,
-  "latitude": position?.latitude,
-  "longitude": position?.longitude,
-  "createdAt": FieldValue.serverTimestamp(),
-};
+    // Build user map
+    final userMap = {
+      "name": name,
+      "email": email,
+      "phone": phone,
+      // "address": address,
+      "role": role,
+      "password": password,
+      "latitude": position?.latitude,
+      "longitude": position?.longitude,
+      "createdAt": FieldValue.serverTimestamp(),
+    };
 
-if (role.toLowerCase() == "farmer") {
-  userMap["revenue"] = 0;
-  userMap["orders"] = 0;
-  if (deliveryRadius != null) {
-    userMap["deliveryRadius"] = deliveryRadius;
-  }
-}
+    if (role.toLowerCase() == "farmer") {
+      userMap["revenue"] = 0;
+      userMap["orders"] = 0;
+      if (deliveryRadius != null) {
+        userMap["deliveryRadius"] = deliveryRadius;
+      }
+    }
 
-// Save to Firestore
-await FirebaseFirestore.instance.collection('users').doc(uid).set(userMap);
+    // Save to Firestore
+    await FirebaseFirestore.instance.collection('users').doc(uid).set(userMap);
 
-debugPrint("✅ User profile saved to Firestore for UID: $uid");
-showLoadingDialog(context);
-Navigator.of(context).push(MaterialPageRoute(builder: (context) => LoginForm()));
-Navigator.of(context).maybePop();
-
+    debugPrint("✅ User profile saved to Firestore for UID: $uid");
+    showLoadingDialog(context);
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => LoginForm()));
+    Navigator.of(context).maybePop();
+    return true;
   } on FirebaseAuthException catch (e) {
     debugPrint("⚠️ ${e.message}");
     // ScaffoldMessenger.of(context).showSnackBar(
     //   SnackBar(content: Text(e.message ?? 'Registration failed')),
     // );
+    return false;
   }
 }
 
@@ -111,8 +129,17 @@ Future<Map<String, dynamic>> loginWithEmailPassWord(
         .signInWithEmailAndPassword(email: email, password: password);
 
     try {
-      Position? position = await fetchLocation()
-          .timeout(const Duration(seconds: 10));
+      Position? position = await fetchLocation().timeout(
+        const Duration(seconds: 10),
+      );
+      GetServerKey getServerKey = GetServerKey();
+      String serverKey = await getServerKey.getServerKeyToken();
+      debugPrint(
+        "-----------------------------------------------------------------$serverKey",
+      );
+      NotificationServices notificationServices = NotificationServices();
+      notificationServices.requestNotificationPermission();
+      String? fcmToken = await notificationServices.getDeviceToken();
 
       if (position != null) {
         await FirebaseFirestore.instance
@@ -123,6 +150,13 @@ Future<Map<String, dynamic>> loginWithEmailPassWord(
               "longitude": position.longitude,
             }, SetOptions(merge: true));
       }
+      if (fcmToken != null) {
+        await FirebaseFirestore.instance
+            .collection("users")
+            .doc(userCredential.user!.uid)
+            .set({"fcmToken": fcmToken}, SetOptions(merge: true));
+      }
+      debugPrint("-----------------------------Token saved: $fcmToken");
     } catch (e) {
       debugPrint("⚠ Location update skipped: $e");
     }
@@ -133,8 +167,6 @@ Future<Map<String, dynamic>> loginWithEmailPassWord(
     return {"success": false, "message": "Invalid email or password."};
   }
 }
-
-
 
 // Future<void> loginWithPhoneOTP(String phone, BuildContext context) async {
 //   TextEditingController otpController = TextEditingController();

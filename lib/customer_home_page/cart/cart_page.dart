@@ -12,31 +12,60 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
+  late Stream<QuerySnapshot> _cartStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCart();
+  }
+
+  void _loadCart() {
+    final buyerId = FirebaseAuth.instance.currentUser!.uid;
+    _cartStream = FirebaseFirestore.instance
+        .collection('cart')
+        .where('buyerId', isEqualTo: buyerId)
+        .snapshots();
+  }
+
+  Future<void> _refreshCart() async {
+    // Trigger a rebuild by reloading the stream
+    setState(() {
+      _loadCart();
+    });
+    await Future.delayed(const Duration(milliseconds: 1000)); // smooth effect
+  }
+
   @override
   Widget build(BuildContext context) {
-    final String buyerId = FirebaseAuth.instance.currentUser!.uid;
+    final buyerId = FirebaseAuth.instance.currentUser!.uid;
+
     return Scaffold(
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('cart')
-            .where('buyerId', isEqualTo: buyerId)
-            .snapshots(),
-        builder: (context, snapshot) {
-          // 🔄 While loading data
-          if (snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          // ❌ If error occurs
-          if (snapshot.hasError) {
-            return const Center(child: Text("Something went wrong"));
-          }
-          // 📦 If no items in cart
-          if (snapshot.data!.docs.isEmpty) {
-            return const CartEmpty();
-          }
-          // ✅ If items exist
-          return CartWithItems(buyerId:buyerId);
-        },
+      body: RefreshIndicator(
+        color: Colors.green,
+        onRefresh: _refreshCart,
+        child: StreamBuilder<QuerySnapshot>(
+          stream: _cartStream,
+          builder: (context, snapshot) {
+            // 🔄 While loading data
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            // ❌ If error occurs
+            if (snapshot.hasError) {
+              return const Center(child: Text("Something went wrong"));
+            }
+
+            // 📦 If no items in cart
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const CartEmpty();
+            }
+
+            // ✅ If items exist
+            return CartWithItems(buyerId: buyerId);
+          },
+        ),
       ),
     );
   }

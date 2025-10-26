@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:forms/authentication/db_functions.dart';
 import 'package:forms/widgets/appbar.dart';
 import 'package:forms/farmer_home_page/farmer_main_page.dart';
 import 'package:forms/reusables/final_vars.dart';
@@ -49,10 +49,10 @@ class _AddProductPage extends State<AddProductPage> {
   double discount = 0;
 
   void updateDiscount() {
-    final mrp = double.tryParse(mrpController.text) ?? 0;
-    final sp = double.tryParse(spController.text) ?? 0;
+    final mrp = double.tryParse(mrpController.text);
+    final sp = double.tryParse(spController.text);
 
-    if (mrp > 0 && sp > 0) {
+    if (mrp! > 0 && sp! > 0) {
       if (sp <= mrp) {
         setState(() {
           discount = ((mrp - sp) / mrp * 100);
@@ -63,18 +63,19 @@ class _AddProductPage extends State<AddProductPage> {
         });
 
         // Show a warning SnackBar or toast
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Selling Price cannot be more than MRP."),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(errorBar("Selling price can't be more than MRP"));
       }
     } else {
       setState(() {
         discount = 0;
       });
     }
+  }
+
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
   void _showImageSourceSelector(BuildContext context) {
@@ -95,7 +96,7 @@ class _AddProductPage extends State<AddProductPage> {
             leading: Icon(Icons.photo_library),
             title: Text('Choose from gallery'),
             onTap: () {
-             Navigator.maybePop(context);
+              Navigator.maybePop(context);
 
               _pickImageFromGallery();
             },
@@ -182,10 +183,25 @@ class _AddProductPage extends State<AddProductPage> {
                   focusedBorder: border,
                 ),
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Product Name is required';
+                  final name = value?.trim() ?? '';
+
+                  // Rule 1: Empty check
+                  if (name.isEmpty) {
+                    return "Product name cannot be empty";
                   }
-                  return null;
+
+                  // Rule 2: Special characters not allowed
+                  final validNameRegex = RegExp(r'^[a-zA-Z0-9 ]+$');
+                  if (!validNameRegex.hasMatch(name)) {
+                    return "Invalid characters not allowed";
+                  }
+
+                  // Rule 3: Length restriction
+                  if (name.length > 50) {
+                    return "Product name too long (max 50 chars)";
+                  }
+
+                  return null; // ✅ Valid name
                 },
               ),
               SizedBox(height: 25),
@@ -193,17 +209,26 @@ class _AddProductPage extends State<AddProductPage> {
                 cursorColor: Colors.black,
                 controller: imageUrlController,
                 decoration: InputDecoration(
-                  labelText: "Image url",
+                  labelText: "Image URL",
                   labelStyle: Theme.of(context).textTheme.bodyMedium,
                   focusedBorder: border,
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Image url is required';
+                    return 'Image URL is required'; // Case: empty input
                   }
-                  return null;
+
+                  final Uri? uri = Uri.tryParse(value.trim());
+
+                  if (uri == null ||
+                      !(uri.isScheme('http') || uri.isScheme('https'))) {
+                    return 'Enter valid image URL'; // Case: invalid format (TCA-009)
+                  }
+
+                  return null; // Valid format → Accepted (TCA-008)
                 },
               ),
+
               SizedBox(height: 25),
 
               // PRODUCT DESCRIPTION
@@ -310,9 +335,20 @@ class _AddProductPage extends State<AddProductPage> {
                   if (value == null || value.trim().isEmpty) {
                     return 'Stock is required';
                   }
-                  return null;
+
+                  final int? stock = int.tryParse(value.trim());
+                  if (stock == null) {
+                    return 'Stock must be a valid number';
+                  }
+
+                  if (stock <= 0) {
+                    return 'Stock must be greater than 0';
+                  }
+
+                  return null; // ✅ Valid input
                 },
               ),
+
               SizedBox(height: 25),
 
               Row(
@@ -392,7 +428,7 @@ class _AddProductPage extends State<AddProductPage> {
                     context: context,
                     initialDate: DateTime.now(),
                     firstDate: DateTime(2024),
-                    lastDate: DateTime.now(),
+                    lastDate: DateTime.now(), // Prevents selecting future dates
                     builder: (context, child) {
                       return Theme(
                         data: Theme.of(context).copyWith(
@@ -411,18 +447,19 @@ class _AddProductPage extends State<AddProductPage> {
                         ),
                         child: child!,
                       );
-                    }, // Prevents selecting future dates
+                    },
                   );
-                  setState(() {
-                    harvestedDate = pickedDate;
-                    if (pickedDate != null) {
-                      setState(() {
-                        harvestedDate = pickedDate;
-                        harvestedDateController.text =
-                            "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
-                      });
-                    }
-                  });
+
+                  if (pickedDate != null) {
+                    setState(() {
+                      harvestedDate = pickedDate;
+                      harvestedDateController.text =
+                          "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+
+                      // ✅ Auto-toggle harvestedToday
+                      harvestedToday = _isSameDay(pickedDate, DateTime.now());
+                    });
+                  }
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -432,22 +469,35 @@ class _AddProductPage extends State<AddProductPage> {
                 },
               ),
 
+              // helper method
               SizedBox(height: 15),
               SwitchListTile(
                 title: Text("Harvested today?"),
-                activeColor: Color(0xFF4CA330),
                 value: harvestedToday,
-                onChanged: (val) => setState(() => harvestedToday = val),
+                activeThumbColor: Color(0xFF4CA330),
+                onChanged: (bool value) {
+                  setState(() {
+                    harvestedToday = value;
+                    if (value) {
+                      harvestedDate = DateTime.now();
+                      harvestedDateController.text =
+                          "${harvestedDate!.day}/${harvestedDate!.month}/${harvestedDate!.year}";
+                    } else {
+                      harvestedDate = null;
+                      harvestedDateController.clear();
+                    }
+                  });
+                },
               ),
               SwitchListTile(
                 title: Text("Any pesticides used?"),
-                activeColor: Color(0xFF4CA330),
+                activeThumbColor: Color(0xFF4CA330),
                 value: pesticidesUsed,
                 onChanged: (val) => setState(() => pesticidesUsed = val),
               ),
               SwitchListTile(
                 title: Text("Organically grown?"),
-                activeColor: Color(0xFF4CA330),
+                activeThumbColor: Color(0xFF4CA330),
                 value: isOrganic,
                 onChanged: (val) => setState(() => isOrganic = val),
               ),
@@ -495,7 +545,13 @@ class _AddProductPage extends State<AddProductPage> {
 
                     // Store product details
                     try {
-                      String? imageUrl;
+                      final mrp = double.tryParse(mrpController.text);
+                      final sp = double.tryParse(spController.text);
+                      if (mrp == null || sp == null) {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(errorBar("Enter valid price"));
+                      }
 
                       // if (_selectedImage != null) {
                       //   try {
@@ -524,10 +580,10 @@ class _AddProductPage extends State<AddProductPage> {
                         'sellingPrice': double.parse(spController.text),
                         'discountPercent': discount,
                         'originalStock': int.parse(stockController.text),
-                        'presentStock':int.parse(stockController.text),
+                        'presentStock': int.parse(stockController.text),
                         'isOrganic': isOrganic,
                         'anyPesticides': pesticidesUsed,
-                        'img':imageUrlController.text,
+                        'img': imageUrlController.text,
                         'harvestedDate': harvestedDate!.toIso8601String(),
                         'createdAt': Timestamp.now(),
                         'farmerId': FirebaseAuth.instance.currentUser!.uid,
@@ -536,7 +592,11 @@ class _AddProductPage extends State<AddProductPage> {
                       await FirebaseFirestore.instance
                           .collection('products')
                           .add(productData);
-
+                      await sendNotificationToFarmer(
+                        title: "New Product Added",
+                        body:
+                            "Your product '${productNameController.text}' is now live!",
+                      );
                       ScaffoldMessenger.of(
                         context,
                       ).showSnackBar(successBar("Product added successfully!"));

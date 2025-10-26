@@ -106,7 +106,7 @@ class _RoleWidgetState extends State<RoleWidget> {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
-      value: selectedRole,
+      initialValue: selectedRole,
       style: TextStyle(fontSize: 16, color: Colors.black),
       decoration: InputDecoration(
         labelText: "Role",
@@ -147,6 +147,30 @@ class FullNameWidget extends StatelessWidget {
 
   const FullNameWidget({super.key, required this.controller});
 
+  String? _validateFullName(String? value) {
+    final trimmedValue = value?.trim() ?? '';
+
+    if (trimmedValue.isEmpty) {
+      return 'Full Name is required';
+    }
+
+    if (trimmedValue.length < 2) {
+      return 'Name must be at least 2 characters';
+    }
+
+    if (trimmedValue.length > 50) {
+      return 'Name cannot exceed 50 characters';
+    }
+
+    // Regex: letters and spaces only, no consecutive spaces
+    final nameRegex = RegExp(r'^[A-Za-z]+(?: [A-Za-z]+)*$');
+    if (!nameRegex.hasMatch(trimmedValue)) {
+      return 'Enter a valid name (letters and single spaces only)';
+    }
+
+    return null; // validation passed
+  }
+
   @override
   Widget build(BuildContext context) {
     return TextFormField(
@@ -159,9 +183,11 @@ class FullNameWidget extends StatelessWidget {
         focusedBorder: border,
         enabledBorder: border,
       ),
+      validator: _validateFullName,
     );
   }
 }
+
 
 class EmailWidget extends StatelessWidget {
   final TextEditingController controller;
@@ -190,6 +216,26 @@ class PhoneWidget extends StatelessWidget {
 
   const PhoneWidget({super.key, required this.controller});
 
+  String? _validatePhone(String? value) {
+    final trimmedValue = value?.trim() ?? '';
+
+    if (trimmedValue.isEmpty) {
+      return 'Phone number required';
+    }
+
+    // Check if only digits
+    final digitsOnly = RegExp(r'^[0-9]+$');
+    if (!digitsOnly.hasMatch(trimmedValue)) {
+      return 'Phone number can contain digits only';
+    }
+
+    if (trimmedValue.length != 10) {
+      return 'Enter a valid 10-digit phone number';
+    }
+
+    return null; // validation passed
+  }
+
   @override
   Widget build(BuildContext context) {
     return TextFormField(
@@ -197,21 +243,14 @@ class PhoneWidget extends StatelessWidget {
       cursorColor: Colors.black,
       keyboardType: TextInputType.number,
       decoration: InputDecoration(
-        prefix: Text("+91 "),
+        prefix: const Text("+91 "),
         labelText: "Phone",
         labelStyle: Theme.of(context).textTheme.bodyMedium,
         border: border,
         focusedBorder: border,
         enabledBorder: border,
       ),
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) {
-          return 'Phone number required';
-        } else if (value.trim().length != 10) {
-          return 'Enter a valid 10-digit number';
-        }
-        return null;
-      },
+      validator: _validatePhone,
     );
   }
 }

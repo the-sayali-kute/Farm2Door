@@ -290,7 +290,7 @@ SnackBar errorBar(String message) {
       children: [
         Icon(Icons.error_outline, color: Colors.white),
         SizedBox(width: 10),
-        Text(message),
+        Text(message,overflow: TextOverflow.ellipsis,),
       ],
     ),
     backgroundColor: Colors.red.shade600, // Strong red color
