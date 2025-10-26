@@ -654,85 +654,85 @@ class _BusinessAnalyticsWidgetState extends State<BusinessAnalyticsWidget> {
     );
   }
 
-  Widget _buildCategoryPie() {
-    if (categoryRevenue.isEmpty) {
-      return _emptyCard("No category data yet");
-    }
-    final entries = categoryRevenue.entries.toList();
-    final total = entries.fold<double>(0.0, (s, e) => s + e.value);
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Category-wise Revenue",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 140,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: PieChart(
-                            PieChartData(
-                              sections: entries.map((e) {
-                                final perc = total > 0
-                                    ? (e.value / total)
-                                    : 0.0;
-                                final color = _colorForString(e.key);
-                                return PieChartSectionData(
-                                  title: "${(perc * 100).toStringAsFixed(0)}%",
-                                  value: e.value,
-                                  color: color,
-                                  titleStyle: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.white,
-                                  ),
-                                );
-                              }).toList(),
-                              sectionsSpace: 2,
-                              centerSpaceRadius: 24,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: ListView(
-                      shrinkWrap: true,
-                      children: entries.map((e) {
-                        final color = _colorForString(e.key);
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: Row(
-                            children: [
-                              Container(width: 12, height: 12, color: color),
-                              const SizedBox(width: 8),
-                              Expanded(child: Text(e.key)),
-                              Text("₹${e.value.toStringAsFixed(0)}"),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget _buildCategoryPie() {
+  //   if (categoryRevenue.isEmpty) {
+  //     return _emptyCard("No category data yet");
+  //   }
+  //   final entries = categoryRevenue.entries.toList();
+  //   final total = entries.fold<double>(0.0, (s, e) => s + e.value);
+  //   return Card(
+  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  //     child: Padding(
+  //       padding: const EdgeInsets.all(12),
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           const Text(
+  //             "Category-wise Revenue",
+  //             style: TextStyle(fontWeight: FontWeight.bold),
+  //           ),
+  //           const SizedBox(height: 12),
+  //           SizedBox(
+  //             height: 140,
+  //             child: Row(
+  //               children: [
+  //                 Expanded(
+  //                   child: Column(
+  //                     children: [
+  //                       Expanded(
+  //                         child: PieChart(
+  //                           PieChartData(
+  //                             sections: entries.map((e) {
+  //                               final perc = total > 0
+  //                                   ? (e.value / total)
+  //                                   : 0.0;
+  //                               final color = _colorForString(e.key);
+  //                               return PieChartSectionData(
+  //                                 title: "${(perc * 100).toStringAsFixed(0)}%",
+  //                                 value: e.value,
+  //                                 color: color,
+  //                                 titleStyle: const TextStyle(
+  //                                   fontSize: 12,
+  //                                   color: Colors.white,
+  //                                 ),
+  //                               );
+  //                             }).toList(),
+  //                             sectionsSpace: 2,
+  //                             centerSpaceRadius: 24,
+  //                           ),
+  //                         ),
+  //                       ),
+  //                     ],
+  //                   ),
+  //                 ),
+  //                 const SizedBox(width: 8),
+  //                 Expanded(
+  //                   child: ListView(
+  //                     shrinkWrap: true,
+  //                     children: entries.map((e) {
+  //                       final color = _colorForString(e.key);
+  //                       return Padding(
+  //                         padding: const EdgeInsets.symmetric(vertical: 4.0),
+  //                         child: Row(
+  //                           children: [
+  //                             Container(width: 12, height: 12, color: color),
+  //                             const SizedBox(width: 8),
+  //                             Expanded(child: Text(e.key)),
+  //                             Text("₹${e.value.toStringAsFixed(0)}"),
+  //                           ],
+  //                         ),
+  //                       );
+  //                     }).toList(),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildRecentActivityList() {
     if (recentActivity.isEmpty) return _emptyCard("No recent activity");

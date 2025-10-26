@@ -94,24 +94,7 @@ class _CartWithItemsState extends State<CartWithItems> {
       for (var item in cartItems) {
         final farmerId = item['farmerId'];
 
-        if (!notifiedFarmers.contains(farmerId)) {
-          final tokenSnap = await FirebaseFirestore.instance
-              .collection('fcmTokens')
-              .doc(farmerId)
-              .get();
-
-          final token = tokenSnap.data()?['token'];
-
-          // if (token != null) {
-          //   await sendNotificationToFarmer(
-          //     token,
-          //     "New Order Received",
-          //     "You got an order for ${item['productName']}",
-          //   );
-
-          //   notifiedFarmers.add(farmerId);
-          // }
-        }
+        if (!notifiedFarmers.contains(farmerId)) {}
       }
       showModalBottomSheet(
         context: context,
